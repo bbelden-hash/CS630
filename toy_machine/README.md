@@ -1,43 +1,60 @@
- build a simple machine that completes fetch-decode-execute loop.
+# CS 630/730 — HW0 grading image
 
-    fetch-decode-execute cycle:
-        continuous loop that a computer's CPU uses to read and run every program instruction from boot-up to shutdown
-    
-        fetch: CPU gets the next instruction from the computer's memory (RAM)
-               using an address held in a register called the program counter.
-        decode: the control unit translates the binary instruction into signals
-                that tell the rest of the CPU hardware what circuits or operations to turn on.
-        execute: ALU or other parts of the processor perform the actual action,
-                 like adding numbers, moving data, or jumping to a new instruction address.
+## What's inside the image
 
-Simple Instruction Set:
-
-For operands:
-    Rd means the destination register, with d as the index. 
-    Rsi is for the source register, with i as the index.
-
-LOAD_I --> Syntax: LOAD_I Rd, i, Semantics: Rd <-- imm, where i is a signed decimal integer literal.
-ADD --> Syntax: ADD Rd, Rs1, Rs2, Semantics: Rd <-- Rs1 + Rs2. Operands are red before the write, so ADD R0, R0, R1 is well-defined.
-HALT --> Syntax: HALT, Semantics: Stop execution immediately. Any instructions after HALT are never reached.
-
-representation that can answer:
-    "What operation is this?"
-    "Which register is the destination?"
-    "Which registers are the sources?"
-    "What immediate integer was provided?"
-
-LOAD_I needs to store two pieces of information: LOAD_I R3, 7 = R3 <- 7
-    destination register (R3)
-    immediate value (7)
-ADD needs to store three pieces of information: ADD R0, R2, R6 = R0 <- R2 + R6
-    destination register (R0)
-    source1 register (R2)
-    source2 register (R6)
-HALT needs to store, "This is a HALT instruction":
-    a STOP
-
-Architecture Layer --> define what exists, machine state
-Programming Layer --> establish the initial state and perform fetch, decode, execute
+| Tool | Purpose |
+|---|---|
+| `gcc` / `g++` / `make` (build-essential) | build C/C++ submissions |
+| `python3` | run Python submissions |
+| `javac` / `java` (default-jdk) | build & run Java submissions |
+| `ocaml`, `ocaml-dune`, `ocamlfind` | build OCaml submissions (and the OCaml oracle) |
 
 
+## Build
 
+```bash
+docker build -t cs630-build:2026fa .
+```
+
+(`cs630-build:2026fa` follows the per-semester tagging convention used
+elsewhere in the course's build environment.)
+
+## Self-check a submission
+
+Mount the submission directory at `/work` and run `hw0_check.sh`
+against your build/run command. The checker appends the path to each
+test's assembly file as the final argument, so give it however you'd
+normally invoke your program.
+
+C/C++ (assumes the submission's Makefile produces `./hw0_toy_machine`):
+
+```bash
+docker run --rm -v "$PWD/submission:/work:ro" -w /work cs630-build:2026fa \
+  bash -c "make && hw0_check.sh ./hw0_toy_machine"
+```
+
+Python:
+
+```bash
+docker run --rm -v "$PWD/submission:/work:ro" -w /work cs630-build:2026fa \
+  hw0_check.sh python3 toy_machine.py
+```
+
+Java (assumes `Main.class` after compiling):
+
+```bash
+docker run --rm -v "$PWD/submission:/work:ro" -w /work cs630-build:2026fa \
+  bash -c "javac Main.java && hw0_check.sh java Main"
+```
+
+OCaml (via dune):
+
+```bash
+docker run --rm -v "$PWD/submission:/work:ro" -w /work cs630-build:2026fa \
+  bash -c "dune build && hw0_check.sh -- dune exec ./toy.exe --"
+```
+
+## Notes 
+
+- This image intentionally covers only C/C++, Python, Java, and OCaml for
+  HW0. 
