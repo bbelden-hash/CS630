@@ -11,7 +11,7 @@ typedef struct {
 
     int32_t R[NUM_REGISTERS];
     uint32_t PC; // program counter -> where next instruction is located in memory
-    uint32_t HALTED;
+    uint32_t IR; // instruction register -> instruction held for the decoder
 } CPU;
 
 // enum: allows swapping out of confusing numbers in code for easy-to-read words
