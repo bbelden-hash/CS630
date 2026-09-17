@@ -4,12 +4,12 @@
 
 void execute(CPU *cpu, Instrn instruction) {
 
-    // if instruction = LOAD_I, update the destination register value to the immediate value
+    // if instruction = LOAD_I, increment the destination register value by the immediate value
     if (instruction.op == LOAD_I) {
 
         cpu->R[instruction.Rd] = instruction.imm;
     }
-    // if the instruction = ADD, add the value sitting in R[Rs1] and the value sitting in R[Rs2] and place the solution in R[Rd]
+    // if the instruction = ADD, add the value sitting in R[Rs1] and the value sitting in R[Rs2] and increment to the solution in R[Rd]
     else if (instruction.op == ADD) {
 
         int64_t wrap =

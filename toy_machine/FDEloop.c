@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 
     if (argc != 2) {
 
-        fprintf(stderr, "error: ./<my_submission> <program.asm>");
+        fprintf(stderr, "error: ./<my_submission> <program.asm>\n");
         return -1;
     }
 
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
     if (program_size == -1) {
 
-        fprintf(stderr, "error: could not open .asm program file in 'load_program'");
+        fprintf(stderr, "error: could not open .asm program file in 'load_program'\n");
         return -1;
     }
 
