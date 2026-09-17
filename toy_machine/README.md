@@ -44,31 +44,31 @@ programmingLayer
     1) ./FDEloop <input.asm>
 
 For Docker:
-    1) cd hw0_docker
-    2) docker build -t toy-machine .
-    3) docker run -it --rm -v "$(cd .. && pwd):/toy_machine" toy-machine
-    4) cd /toy_machine
-    5) ls
-    6) make clean
-    7) make
-    8) find /toy_machine -name "hw0_check.sh"
-    9) cat hw0_docker/hw0_check.sh --> make sure executables match up
-    10) chmod +x hw0_docker/hw0_check.sh --> permission denied
-    11) bash hw0_docker/hw0_check.sh ./FDEloop
-    12) to leave --> exit
+    1. cd hw0_docker
+    2. docker build -t toy-machine .
+    3. docker run -it --rm -v "$(cd .. && pwd):/toy_machine" toy-machine
+    4. cd /toy_machine
+    5. ls
+    6. make clean
+    7. make
+    8. find /toy_machine -name "hw0_check.sh"
+    9. cat hw0_docker/hw0_check.sh --> make sure executables match up
+    10. chmod +x hw0_docker/hw0_check.sh --> permission denied
+    11. bash hw0_docker/hw0_check.sh ./FDEloop
+    12. to leave --> exit
 
 My hw0_check.sh Output ->
 
-PASS  input-1      Halt directly, check the init state
-PASS  input-2      LOAD_I: place an immediate into a register
-PASS  input-3      ADD: Rd <- Rs1 + Rs2
-PASS  input-4      compute 30 + 10, then 2 + result
-PASS  input-5      every register written, printed R0..R7 in order
-PASS  input-6      comments and blank lines are ignored
-PASS  input-7      dead code: only the first HALT is reached
-PASS  input-9      R0 is a general-purpose register here (no hardcoded zero)
-PASS  input-10     operands are read before the write: Rd may also be a source
-PASS  input-14     INT32_MAX + 1 wraps to INT32_MIN (two's complement)
+    I. PASS  input-1      Halt directly, check the init state
+    II. PASS  input-2      LOAD_I: place an immediate into a register
+    III. PASS  input-3      ADD: Rd <- Rs1 + Rs2
+    IV. PASS  input-4      compute 30 + 10, then 2 + result
+    V. PASS  input-5      every register written, printed R0..R7 in order
+    VI. PASS  input-6      comments and blank lines are ignored
+    VII. PASS  input-7      dead code: only the first HALT is reached
+    VII. PASS  input-8     R0 is a general-purpose register here (no hardcoded zero)
+    IX. PASS  input-9     operands are read before the write: Rd may also be a source
+    X. PASS  input-10     INT32_MAX + 1 wraps to INT32_MIN (two's complement)
 
 10/10 public sample cases passed
 (this is a sample self-check, not the full graded suite)
