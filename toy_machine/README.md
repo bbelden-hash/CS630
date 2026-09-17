@@ -36,10 +36,12 @@ programmingLayer
 6) Executer: 'execute.c'
     performs calculations and updates registers in accordance from the instruction sent by the decoder
 
-To Compile: make clean
-            make
+To Compile: 
+    make clean
+    make
 
-To Run: ./FDEloop <input.asm>
+To Run: 
+    ./FDEloop <input.asm>
 
 All Done! This was too fun :|
 
