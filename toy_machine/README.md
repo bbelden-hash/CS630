@@ -17,7 +17,7 @@ Building my toy_machine in layers:
 architectureLayer
 
 1) Machine State: 'machine_state.h'
-    - R0 - R7 registers, program counter, instruction register, available - - - instructions, operands associated with instruction
+    - R0 - R7 registers, program counter, instruction register, available instructions, operands associated with instruction
 
 2) Initial State: 'initial_state.c', 'initial_state.h'
     - initialize R0 - R7 registers, program counter, and 'halted' to 0
@@ -36,12 +36,12 @@ programmingLayer
 6) Executer: 'execute.c'
     - performs calculations and updates registers in accordance from the instruction sent by the decoder
 
-To Compile: 
-    - make clean
-    - make
+-> To Compile: 
+    1) make clean
+    2) make
 
-To Run: 
-    - ./FDEloop <input.asm>
+-> To Run: 
+    1) ./FDEloop <input.asm>
 
 All Done! This was too fun :|
 
