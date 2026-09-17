@@ -1,60 +1,49 @@
-# CS 630/730 — HW0 grading image
+MY TINY CPU!
+LEGIT LITTLE PROCESSOR SIMULATOR!
 
-## What's inside the image
+Building my toy_machine in layers:
 
-| Tool | Purpose |
-|---|---|
-| `gcc` / `g++` / `make` (build-essential) | build C/C++ submissions |
-| `python3` | run Python submissions |
-| `javac` / `java` (default-jdk) | build & run Java submissions |
-| `ocaml`, `ocaml-dune`, `ocamlfind` | build OCaml submissions (and the OCaml oracle) |
+    1. Machine state
+    2. Program storage
+    3. Read/parse .asm file
+    4. Fetch
+    5. Decode
+    6. Execute
+    7. FDE loop
+    8. Print final registers
+    9. Compile/text
+    10. Handle edge cases
+
+architectureLayer
+
+1) Machine State: 'machine_state.h'
+    R0 - R7 registers, program counter, instruction register, available instructions, operands associated with instruction
+
+2) Initial State: 'initial_state.c', 'initial_state.h'
+    initialize R0 - R7 registers, program counter, and 'halted' to 0
+
+programmingLayer
+
+3) Program Housing: 'program.c'
+    pulls and parses the .asm file through a while loop, increments a program_size variable as each instruction from the .asm is placed in the storage array of type struct Instrn
+
+4) Fetcher: 'fetch.c'
+    pulls the correct information out of the program array holding all instructions from the .asm file and gives that information to the cpu.IR, increments the PC++
+
+5) Decoder: 'decoder.c'
+    returns the information from the fetcher sends to the 'execute'
+
+6) Executer: 'execute.c'
+    performs calculations and updates registers in accordance from the instruction sent by the decoder
+
+To Compile: make clean
+            make
+
+To Run: ./FDEloop <input.asm>
+
+All Done! This was too fun :|
 
 
-## Build
 
-```bash
-docker build -t cs630-build:2026fa .
-```
 
-(`cs630-build:2026fa` follows the per-semester tagging convention used
-elsewhere in the course's build environment.)
 
-## Self-check a submission
-
-Mount the submission directory at `/work` and run `hw0_check.sh`
-against your build/run command. The checker appends the path to each
-test's assembly file as the final argument, so give it however you'd
-normally invoke your program.
-
-C/C++ (assumes the submission's Makefile produces `./hw0_toy_machine`):
-
-```bash
-docker run --rm -v "$PWD/submission:/work:ro" -w /work cs630-build:2026fa \
-  bash -c "make && hw0_check.sh ./hw0_toy_machine"
-```
-
-Python:
-
-```bash
-docker run --rm -v "$PWD/submission:/work:ro" -w /work cs630-build:2026fa \
-  hw0_check.sh python3 toy_machine.py
-```
-
-Java (assumes `Main.class` after compiling):
-
-```bash
-docker run --rm -v "$PWD/submission:/work:ro" -w /work cs630-build:2026fa \
-  bash -c "javac Main.java && hw0_check.sh java Main"
-```
-
-OCaml (via dune):
-
-```bash
-docker run --rm -v "$PWD/submission:/work:ro" -w /work cs630-build:2026fa \
-  bash -c "dune build && hw0_check.sh -- dune exec ./toy.exe --"
-```
-
-## Notes 
-
-- This image intentionally covers only C/C++, Python, Java, and OCaml for
-  HW0. 

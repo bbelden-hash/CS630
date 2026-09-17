@@ -1,0 +1,8 @@
+# Test program
+
+LOAD_I R1, 2147483647
+LOAD_I R2, 1
+ADD R3, R1, R2
+HALT
+
+

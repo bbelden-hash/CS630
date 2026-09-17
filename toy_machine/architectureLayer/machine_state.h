@@ -3,16 +3,7 @@
 
 #include <stdint.h>
 
-
 #define NUM_REGISTERS 8
-
-// 8 general-purpose registers, 32-bit signed integers -> -2,147,483,648  to  2,147,483,647 (no overflow)
-typedef struct {
-
-    int32_t R[NUM_REGISTERS];
-    uint32_t PC; // program counter -> where next instruction is located in memory
-    uint32_t IR; // instruction register -> instruction held for the decoder
-} CPU;
 
 // enum: allows swapping out of confusing numbers in code for easy-to-read words
 
@@ -33,6 +24,17 @@ typedef struct {
     int Rs2;
     int imm;
 } Instrn;
+
+// 8 general-purpose registers, 32-bit signed integers -> -2,147,483,648  to  2,147,483,647
+typedef struct {
+
+    int32_t R[NUM_REGISTERS]; // registers
+    uint32_t PC; // program counter -> index of the next instruction
+
+    Instrn IR; // instruction register -> program instruction sent to the decoder
+
+    int halted; // if HALT has not happened --> keep running
+} CPU;
 
 #endif
 

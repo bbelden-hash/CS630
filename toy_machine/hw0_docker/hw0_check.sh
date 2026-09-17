@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # hw0_check.sh -- Self-check for HW0 (The Toy Machine)
 #
 # This is a self-check tool: it runs your program against a
@@ -10,6 +11,7 @@
 # but the graded set includes additional cases (chained accumulation over
 # many steps, more wraparound combinations, and fresh inputs not shown here)
 # that are not included in this script.
+
 set -u
 PROG="$(basename "$0")"
 
