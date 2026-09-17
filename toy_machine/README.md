@@ -44,18 +44,18 @@ programmingLayer
     1) ./FDEloop <input.asm>
 
 For Docker:
-    1. cd hw0_docker
-    2. docker build -t toy-machine .
-    3. docker run -it --rm -v "$(cd .. && pwd):/toy_machine" toy-machine
-    4. cd /toy_machine
-    5. ls
-    6. make clean
-    7. make
-    8. find /toy_machine -name "hw0_check.sh"
-    9. cat hw0_docker/hw0_check.sh --> make sure executables match up
-    10. chmod +x hw0_docker/hw0_check.sh --> permission denied
-    11. bash hw0_docker/hw0_check.sh ./FDEloop
-    12. to leave --> exit
+    * cd hw0_docker
+    * docker build -t toy-machine .
+    * docker run -it --rm -v "$(cd .. && pwd):/toy_machine" toy-machine
+    * cd /toy_machine
+    * ls
+    * make clean
+    * make
+    * find /toy_machine -name "hw0_check.sh"
+    * cat hw0_docker/hw0_check.sh --> make sure executables match up
+    * chmod +x hw0_docker/hw0_check.sh --> permission denied
+    * bash hw0_docker/hw0_check.sh ./FDEloop
+    * to leave --> exit
 
 My hw0_check.sh Output ->
 
