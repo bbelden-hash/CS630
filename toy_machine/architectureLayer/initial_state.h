@@ -4,5 +4,6 @@
 #include "machine_state.h"
 
 void initialize_machine(CPU *cpu);
+void initialize_MEM(MEM *ram);
 
 #endif

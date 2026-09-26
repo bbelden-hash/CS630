@@ -18,8 +18,10 @@ int main(int argc, char *argv[]) {
     }
 
     CPU cpu;
+    MEM ram;
     initialize_machine(&cpu);
-
+    initialize_MEM(&ram);
+    
     // holds the entire program from the .asm
     // if one 'Instrn' holds one instruction, an array of 'Instrn' ...
     Instrn program[MAX_PROGRAM_SIZE];

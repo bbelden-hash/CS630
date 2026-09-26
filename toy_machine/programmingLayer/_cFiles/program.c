@@ -19,7 +19,7 @@ int load_program(const char *filename, Instrn *program) {
 
     file = fopen(filename, "r");
     if (file == NULL) {
-        fprintf(stderr, "error: no file to open and read in load_program function");
+        fprintf(stderr, "error: no file to open and read in load_program function\n");
         return -1;
     }
 
@@ -35,47 +35,114 @@ int load_program(const char *filename, Instrn *program) {
             continue;
         }
 
+        int rb;
         int rd;
+        int rs;
         int rs1;
         int rs2;
+        int i;
         int imm;
         // & gives sscanf() the address where it should store the operands
         // did sscanf() pull 2 values, 3 values, or no values?
-        if (sscanf(line, "LOAD_I R%d, %d", &rd, &imm) == 2) {
+        if (sscanf(line, "LOAD_I R%d, %d", &rd, &i) == 2) {
 
-            Instrn instruction;
+            Instrn instruction = {0};
 
             instruction.op = LOAD_I;
             instruction.Rd = rd;
-            instruction.Rs1 = 0;
-            instruction.Rs2 = 0;
-            instruction.imm = imm;
+            instruction.i = i;
 
             program[program_size] = instruction;
             program_size++;
         }
         else if (sscanf(line, "ADD R%d, R%d, R%d", &rd, &rs1, &rs2) == 3) {
 
-            Instrn instruction;
+            Instrn instruction = {0};
 
             instruction.op = ADD;
             instruction.Rd = rd;
             instruction.Rs1 = rs1;
             instruction.Rs2 = rs2;
-            instruction.imm = 0;
+
+            program[program_size] = instruction;
+            program_size++;
+        }
+        else if (sscanf(line, "SUB R%d, R%d, R%d", &rd, &rs1, &rs2) == 3) {
+
+            Instrn instruction = {0};
+
+            instruction.op = SUB;
+            instruction.Rd = rd;
+            instruction.Rs1 = rs1;
+            instruction.Rs2 = rs2;
+
+            program[program_size] = instruction;
+            program_size++;
+        }
+        else if (sscanf(line, "MOVE R%d, R%d", &rd, &rs) == 2) {
+
+            Instrn instruction = {0};
+
+            instruction.op = MOVE;
+            instruction.Rd = rd;
+            instruction.Rs = rs;
+
+            program[program_size] = instruction;
+            program_size++;
+        }
+        else if (sscanf(line, "LOAD R%d, %d(R%d)", &rd, &imm, &rb) == 3) {
+
+            Instrn instruction = {0};
+
+            instruction.op = LOAD;
+            instruction.Rb = rb;
+            instruction.Rd = rd;
+            instruction.imm = imm;
+
+            program[program_size] = instruction;
+            program_size++;
+        }
+        else if (sscanf(line, "STORE R%d, %d(R%d)", &rs, &imm, &rb) == 3) {
+
+            Instrn instruction = {0};
+
+            instruction.op = STORE;
+            instruction.Rb = rb;
+            instruction.Rs = rs;
+            instruction.imm = imm;
+
+            program[program_size] = instruction;
+            program_size++;
+        }
+        else if (sscanf(line, "LOAD_B R%d, %d(R%d)", &rd, &imm, &rb) == 3) {
+
+            Instrn instruction = {0};
+
+            instruction.op = LOAD_B;
+            instruction.Rb = rb;
+            instruction.Rd = rd;
+            instruction.imm = imm;
+
+            program[program_size] = instruction;
+            program_size++;
+        }
+        else if (sscanf(line, "STORE_B R%d, %d(R%d)", &rs, &imm, &rb) == 3) {
+
+            Instrn instruction = {0};
+
+            instruction.op = STORE_B;
+            instruction.Rb = rb;
+            instruction.Rs = rs;
+            instruction.imm = imm;
 
             program[program_size] = instruction;
             program_size++;
         }
         else if (strcmp(line, "HALT") == 0) {
 
-            Instrn instruction;
+            Instrn instruction = {0};
 
             instruction.op = HALT;
-            instruction.Rd = 0;
-            instruction.Rs1 = 0;
-            instruction.Rs2 = 0;
-            instruction.imm = 0;
 
             program[program_size] = instruction;
             program_size++;
