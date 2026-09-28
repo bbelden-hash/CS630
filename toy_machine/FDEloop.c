@@ -80,5 +80,11 @@ int main(int argc, char *argv[]) {
         fprintf(stdout, "R%d=%d\n", i, cpu.R[i]);
     }
 
+    printf("\n");
+    for (int i = 0; i < NUM_MEM_LOCATIONS; i++) {
+
+        fprintf(stdout, "MEM[%d]=%d\n", i, ram.M[i]);
+    }
+
     return 0;
 }

@@ -4,6 +4,32 @@
 #include "../../execute.h"
 
 // little-endian style -> lowest memory address holds the least-significant byte (rightmost 8 bits)
+// decided to implement wraparound behavior so -> LOAD R3, -4(R0) will give you the 4 byte int stored in M[1021], M[1022], M[1023], M[0] if R0 is 1, ...
+
+// converts any memory address into a permitted address [0, 1023]
+int wrapAddress(int address) {
+
+    /*
+        example: NUM_MEM_LOCATIONS = 1024
+        address = 1025
+
+        1025 % 1024 = 1
+        1 + 1024 = 1025
+        1025 % 1024 = 1
+        M[1025] = M[1]
+
+        address + 1 = 1026
+        1026 % 1024 = 2
+        2 + 1024 = 1026
+        1026 % 1024 = 2
+        M[1026] = M[2]
+
+        ...
+    */
+    return ((address % NUM_MEM_LOCATIONS)
+            + NUM_MEM_LOCATIONS)
+            % NUM_MEM_LOCATIONS;
+}
 
 void executeLOADSTORE(CPU *cpu, MEM *ram, Instrn instruction) {
 
@@ -13,38 +39,31 @@ void executeLOADSTORE(CPU *cpu, MEM *ram, Instrn instruction) {
         int base = cpu->R[instruction.Rb];
         int address = base + instruction.imm;
 
-        if (address < 0 || address > (NUM_MEM_LOCATIONS - 4)) {
-            fprintf(stderr, "error: invalid calculated starting address in 'LOAD', must be in range [0, 1023]\n");
-            exit(-1);
-        }
+        int address0 = wrapAddress(address);
+        int address1 = wrapAddress(address + 1);
+        int address2 = wrapAddress(address + 2);
+        int address3 = wrapAddress(address + 3);
 
-        if (address % 4 == 0) { 
+        int32_t load =
+            ((uint32_t)ram->M[address0]) // we want this byte to stay in the rightmost 8 bits of 'load'
+            | ((uint32_t)ram->M[address1] << 8) // want this byte to move 8 bits left
+            | ((uint32_t)ram->M[address2] << 16) // want this byte to move 16 bits left
+            | ((uint32_t)ram->M[address3] << 24); // want this byte to move 24 bits left
 
-            int32_t load =
-                ram->M[address] // we want this byte to stay in the rightmost 8 bits of 'load'
-                | (ram->M[address + 1] << 8) // want this byte to move 8 bits left
-                | (ram->M[address + 2] << 16) // want this byte to move 16 bits left
-                | (ram->M[address + 3] << 24); // want this byte to move 24 bits left
-
-            cpu->R[instruction.Rd] = load;
-        } 
-        else {
-            fprintf(stderr, "error: 'LOAD' requires a starting address in 'MEM' that is a multiple of 4\n");
-            exit(-1);
-        }
+        cpu->R[instruction.Rd] = load;
     }
-    // if the instruction = STORE, take the value currently in R[Rs] and store the value within 4 consecutive memory bins starting at the address stored in R[Rb] + the offset (imm)
+    // if the instruction = STORE, store the value to R[Rs] ... store the value within 4 consecutive memory bins starting at the address stored in R[Rb] + the offset (imm)
     else if (instruction.op == STORE) {
 
         int base = cpu->R[instruction.Rb];
         int address = base + instruction.imm;
 
-        int storage = cpu->R[instruction.Rs];
+        int address0 = wrapAddress(address);
+        int address1 = wrapAddress(address + 1);
+        int address2 = wrapAddress(address + 2);
+        int address3 = wrapAddress(address + 3);
 
-        if (address < 0 || address > (NUM_MEM_LOCATIONS - 3)) {
-            fprintf(stderr, "error: invalid calculated starting address in 'STORE', must be in range [0, 1023]\n");
-            exit(-1);
-        }
+        uint32_t storage = cpu->R[instruction.Rs];
 
         /*
             move the bits in 'storage' to the right by n positions (storage >> n)
@@ -62,29 +81,38 @@ void executeLOADSTORE(CPU *cpu, MEM *ram, Instrn instruction) {
             bytes w/ 00 under them -> completely wiped out
             byte w/ FF under it -> output, "keep all 8 bits of this byte segment"
         */
-
         uint8_t byte0 = (storage >> 0) & 0xFF;
         uint8_t byte1 = (storage >> 8) & 0xFF;
         uint8_t byte2 = (storage >> 16) & 0xFF;
         uint8_t byte3 = (storage >> 24) & 0xFF;
 
-        if (address % 4 == 0) { 
-
-            
-
-
-
-
-
-
-
-
-
-
-
-        
-
-
+        ram->M[address0] = byte0;
+        ram->M[address1] = byte1;
+        ram->M[address2] = byte2;
+        ram->M[address3] = byte3;
     }
+    // if the instruction = LOAD_B, take the 8-bit value sitting in memory at R[Rb] + offset (imm) and load into the low 8 bits of R[Rd]
+    else if (instruction.op == LOAD_B) {
 
+        int base = cpu->R[instruction.Rb];
+        int address = base + instruction.imm;
+
+        address = wrapAddress(address);
+
+        uint8_t value = ram->M[address];
+        cpu->R[instruction.Rd] = value;
+    }
+    // if the instruction = STORE_B, take the low 8 bits of R[Rs] and store that value to ram->M[R[Rb] + imm]
+    else if (instruction.op == STORE_B) {
+
+        uint32_t storage = cpu->R[instruction.Rs];
+        uint8_t value = (storage >> 0) & 0xFF;
+
+        int base = cpu->R[instruction.Rb];
+        int address = base + instruction.imm;
+
+        address = wrapAddress(address);
+
+        ram->M[address] = value;
+    }
 }
