@@ -22,6 +22,15 @@ typedef enum {
     HALT // 8
 } Opcode;
 
+typedef enum {
+
+    ALU,
+    LOAD_STORE,
+    BRANCH,
+    DATA_MOVEMENT,
+    HALTED
+} InstrnType;
+
 // operands - instruction relationship:
 typedef struct {
 
@@ -33,6 +42,7 @@ typedef struct {
     int Rs2;
     int i; // immediate value
     int imm; // offset
+    InstrnType type; // instruction category
 } Instrn;
 
 // 8 general-purpose registers, 32-bit signed integers -> -2,147,483,648  to  2,147,483,647

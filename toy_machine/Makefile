@@ -9,7 +9,11 @@ OBJECTS = $(OBJDIR)/main.o \
           $(OBJDIR)/fetch.o \
           $(OBJDIR)/decoder.o \
           $(OBJDIR)/program.o \
-		  $(OBJDIR)/execute.o
+		  $(OBJDIR)/executeALU.o \
+		  $(OBJDIR)/executeDATAMOVEMENT.o \
+		  $(OBJDIR)/executeLOADSTORE.o \
+		  $(OBJDIR)/executeBRANCH.o \
+		  $(OBJDIR)/executeHALT.o
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET)
@@ -32,8 +36,20 @@ $(OBJDIR)/decoder.o: programmingLayer/_cFiles/decoder.c | $(OBJDIR)
 $(OBJDIR)/program.o: programmingLayer/_cFiles/program.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/program.c -o $@
 
-$(OBJDIR)/execute.o: programmingLayer/_cFiles/execute.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/execute.c -o $@
+$(OBJDIR)/executeALU.o: programmingLayer/_cFiles/execute/executeALU.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/execute/executeALU.c -o $@
+
+$(OBJDIR)/executeDATAMOVEMENT.o: programmingLayer/_cFiles/execute/executeDATAMOVEMENT.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/execute/executeDATAMOVEMENT.c -o $@
+
+$(OBJDIR)/executeLOADSTORE.o: programmingLayer/_cFiles/execute/executeLOADSTORE.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/execute/executeLOADSTORE.c -o $@
+
+$(OBJDIR)/executeBRANCH.o: programmingLayer/_cFiles/execute/executeBRANCH.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/execute/executeBRANCH.c -o $@
+
+$(OBJDIR)/executeHALT.o: programmingLayer/_cFiles/execute/executeHALT.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/execute/executeHALT.c -o $@
 
 clean:
 	rm -rf $(OBJDIR) $(TARGET)

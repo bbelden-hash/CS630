@@ -51,6 +51,7 @@ int load_program(const char *filename, Instrn *program) {
             instruction.op = LOAD_I;
             instruction.Rd = rd;
             instruction.i = i;
+            instruction.type = DATA_MOVEMENT;
 
             program[program_size] = instruction;
             program_size++;
@@ -63,6 +64,7 @@ int load_program(const char *filename, Instrn *program) {
             instruction.Rd = rd;
             instruction.Rs1 = rs1;
             instruction.Rs2 = rs2;
+            instruction.type = ALU;
 
             program[program_size] = instruction;
             program_size++;
@@ -75,6 +77,7 @@ int load_program(const char *filename, Instrn *program) {
             instruction.Rd = rd;
             instruction.Rs1 = rs1;
             instruction.Rs2 = rs2;
+            instruction.type = ALU;
 
             program[program_size] = instruction;
             program_size++;
@@ -86,6 +89,7 @@ int load_program(const char *filename, Instrn *program) {
             instruction.op = MOVE;
             instruction.Rd = rd;
             instruction.Rs = rs;
+            instruction.type = DATA_MOVEMENT;
 
             program[program_size] = instruction;
             program_size++;
@@ -98,6 +102,7 @@ int load_program(const char *filename, Instrn *program) {
             instruction.Rb = rb;
             instruction.Rd = rd;
             instruction.imm = imm;
+            instruction.type = LOAD_STORE;
 
             program[program_size] = instruction;
             program_size++;
@@ -110,6 +115,7 @@ int load_program(const char *filename, Instrn *program) {
             instruction.Rb = rb;
             instruction.Rs = rs;
             instruction.imm = imm;
+            instruction.type = LOAD_STORE;
 
             program[program_size] = instruction;
             program_size++;
@@ -122,6 +128,7 @@ int load_program(const char *filename, Instrn *program) {
             instruction.Rb = rb;
             instruction.Rd = rd;
             instruction.imm = imm;
+            instruction.type = LOAD_STORE;
 
             program[program_size] = instruction;
             program_size++;
@@ -134,6 +141,7 @@ int load_program(const char *filename, Instrn *program) {
             instruction.Rb = rb;
             instruction.Rs = rs;
             instruction.imm = imm;
+            instruction.type = LOAD_STORE;
 
             program[program_size] = instruction;
             program_size++;
@@ -143,6 +151,7 @@ int load_program(const char *filename, Instrn *program) {
             Instrn instruction = {0};
 
             instruction.op = HALT;
+            instruction.type = HALTED;
 
             program[program_size] = instruction;
             program_size++;

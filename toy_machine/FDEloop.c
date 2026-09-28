@@ -45,8 +45,34 @@ int main(int argc, char *argv[]) {
         // returns the fetched instruction above
         Instrn instruction = decode(cpu.IR);
 
-        // perform the proper operations to the instruction from decode
-        execute(&cpu, instruction);
+        // switch lets you choose what code to execute based on the value of one expression, instruction.type
+        switch (instruction.type) {
+
+            case ALU:
+                executeALU(&cpu, instruction);
+                break;
+
+            case DATA_MOVEMENT:
+                executeDATAMOVEMENT(&cpu, instruction);
+                break;
+
+            case LOAD_STORE:
+                executeLOADSTORE(&cpu, &ram, instruction);
+                break;
+
+            case BRANCH:
+                // executeBRANCH(&cpu, instruction);
+                break;
+
+            case HALTED:
+                executeHALT(&cpu, instruction);
+                break;
+
+            default:
+                fprintf(stderr, "error: unknown instruction category\n");
+                return -1;
+        }
+
     }
 
     for (int i = 0; i < NUM_REGISTERS; i++) {
