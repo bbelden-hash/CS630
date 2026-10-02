@@ -14,6 +14,24 @@ Building my toy_machine in layers:
     9. Compile/text
     10. Handle edge cases
 
+FDEloop.c
+- int main(int argc, char *argv[])
+    * main function (driver), takes the 'terminal' as parameters to the function ...
+    * argc is the number of objects typed to the terminal when properly running the program separated by a ' '
+    * argv are the actual sequence of char inputs typed by the user to the terminal, each input is separated by a ' ' and each 'word' is placed into an array of chars
+    * a struct 'CPU' object is created from 'machine_state.h' and every item in the struct is initialized to zero
+    * a struct 'MEM' object is created from 'machine_state.h' and every index in the memory array from the struct is initialized to zero
+    * an array of 'Instrn' struct objects is created, given the variable name 'program'
+    * a variable called 'program_size' is created, this will represent the number of lines (instructions) parsed from the .asm file (argv[1])
+    * a function called 'load_program' is called using the .asm file (argv[1]) and the 'program' array as input parameters, it is assigned to the variable program_size
+    * 'load_program' will parse the input .asm file line by line, placing each line (struct 'Instrn' object) from argv[1] as an index in the 'program' array -> it returns the number of lines parsed ('program_size')
+    * upon return from 'load_program', the 'program' array will consist of every instruction the processor needs to complete from the .asm file
+    * if the 'cpu' is not 'HALTED' meaning a particular index in the 'program' arrays 'instruction.op' == 'HALT' or another way to interpret it is a line in the .asm file consists of 'HALT', then ...
+    * iterate through the 'program' arrays 'Instrn' objects and perform the necessary steps for each instruction in the .asm file to complete successfully ...
+    * call the fetch, decode, and corresponding instruction types (ALU, branch, data movement, load-store, etc.) execute function
+    * upon an 'instruction.op' of 'HALT', exit the 'while' loop and print the values currently sitting in all created registers in the 'CPU' struct from the 'machine_state.h' file
+
+
 architectureLayer
 
 1) Machine State: 'machine_state.h'
