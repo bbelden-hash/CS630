@@ -4,7 +4,7 @@
 // programmingLayer/, go up one directory '..', toy_machine/, architectureLayer/
 #include "../architectureLayer/machine_state.h"
 
-void fetch(CPU *cpu, Instrn *program);
+void fetch(CPU *cpu, Instrn program);
 
 #endif
 

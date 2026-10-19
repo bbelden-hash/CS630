@@ -1,17 +1,42 @@
 
 #include "../decoder.h"
 
+// takes the CPU struct from the fetcher and determines: if the IR instruction type is of type branch -> if the conditions are met, assign branched to true
+Instrn decode(CPU *cpu) {
 
-// decode receives the instruction register from fetch and returns this register
-Instrn decode(Instrn IR) {
+    cpu->IR.branched = false;
 
-    return IR;
+    switch(cpu->IR.op) {
+
+        case BEQ:
+            if (cpu->R[cpu->IR.Rs1] == cpu->R[cpu->IR.Rs2]) {
+                cpu->IR.branched = true;
+            }
+        
+        case BNE:
+            if (cpu->R[cpu->IR.Rs1] != cpu->R[cpu->IR.Rs2]) {
+                cpu->IR.branched = true;
+            }
+
+        case BLT:
+            if (cpu->R[cpu->IR.Rs1] < cpu->R[cpu->IR.Rs2]) {
+                cpu->IR.branched = true;
+            }
+
+        case BGE:
+            if (cpu->R[cpu->IR.Rs1] >= cpu->R[cpu->IR.Rs2]) {
+                cpu->IR.branched = true;
+            }
+
+        case JUMP:
+            cpu->IR.branched = true;
+
+        default:
+            break;
+            
+    }
+
+    return cpu->IR;
+
 }
-
-/*
-    because we have chosen to store instructions (IR) as an Instrn struct,
-    this is all that needs to be done! --> return IR
-
-    separating parsing from decoding:
-        decode --> takes the Instrn object and makes it available to execute
-*/
+// returns the instruction with its operations and operands from the CPU to be used in the execute ...

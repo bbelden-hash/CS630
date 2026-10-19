@@ -3,6 +3,6 @@
 
 #include "../architectureLayer/machine_state.h"
 
-Instrn decode(Instrn IR);
+Instrn decode(CPU *cpu);
 
 #endif

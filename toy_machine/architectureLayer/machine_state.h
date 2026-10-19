@@ -2,6 +2,7 @@
 #define MACHINE_STATE_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define NUM_REGISTERS 8
 #define NUM_MEM_LOCATIONS 1024
@@ -19,7 +20,14 @@ typedef enum {
     STORE, // 5
     LOAD_B, // 6
     STORE_B, // 7
-    HALT // 8
+    BEQ, // 8
+    BNE, // 9
+    BLT, // 10
+    BGE, // 11
+    JUMP, // 12
+    LABELED, // 13
+    HALT // 14
+
 } Opcode;
 
 typedef enum {
@@ -28,6 +36,7 @@ typedef enum {
     LOAD_STORE,
     BRANCH,
     DATA_MOVEMENT,
+    NONE,
     HALTED
 } InstrnType;
 
@@ -42,17 +51,23 @@ typedef struct {
     int Rs2;
     int i; // immediate value
     int imm; // offset
+    bool branched; // for decode to determine if a branch is necessary ...
     InstrnType type; // instruction category
 } Instrn;
+
+// labels - a line containing only a name followed by a colon, names the first instruction that comes after it in the file
+typedef struct {
+
+    char L[100]; // label name
+    int PC; // position in array label needs to branch or jump to, an instruction ...
+} LABEL;
 
 // 8 general-purpose registers, 32-bit signed integers -> -2,147,483,648  to  2,147,483,647
 typedef struct {
 
     int32_t R[NUM_REGISTERS]; // registers
-    uint32_t PC; // program counter -> index of the next instruction
 
     Instrn IR; // instruction register -> program instruction sent to the decoder
-
     int halted; // if HALT has not happened --> keep running
 } CPU;
 

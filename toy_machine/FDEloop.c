@@ -22,13 +22,17 @@ int main(int argc, char *argv[]) {
     initialize_machine(&cpu);
     initialize_MEM(&ram);
     
-    // holds the entire program from the .asm
+    // holds the entire program from the .asm (minus the lines consisting of labels)
     // if one 'Instrn' holds one instruction, an array of 'Instrn' ...
     Instrn program[MAX_PROGRAM_SIZE];
 
+    // holds all lines consisting of labels from the .asm file
+    // hoping for a maximum of 10 lines consisting of labels in the .asm file
+    LABEL labels[NUM_OF_LABELS];
+
     int program_size; // could prevent fetch from running past the loaded program
     // 'program' now contains all information from the .asm (argv[1])
-    program_size = load_program(argv[1], program);
+    program_size = load_program(argv[1], program, labels);
 
     if (program_size == -1) {
 
@@ -36,42 +40,23 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    int PC = 0;
+
     while (!cpu.halted) {
 
-        // fetch the program at index PC in the program array of instructions
-        // puts the whole Instrn into cpu.IR and increment PC++
-        fetch(&cpu, program);
+        if (program[PC].op == LABELED) {
 
-        // returns the fetched instruction above
-        Instrn instruction = decode(cpu.IR);
-
-        // switch lets you choose what code to execute based on the value of one expression, instruction.type
-        switch (instruction.type) {
-
-            case ALU:
-                executeALU(&cpu, instruction);
-                break;
-
-            case DATA_MOVEMENT:
-                executeDATAMOVEMENT(&cpu, instruction);
-                break;
-
-            case LOAD_STORE:
-                executeLOADSTORE(&cpu, &ram, instruction);
-                break;
-
-            case BRANCH:
-                // executeBRANCH(&cpu, instruction);
-                break;
-
-            case HALTED:
-                executeHALT(&cpu, instruction);
-                break;
-
-            default:
-                fprintf(stderr, "error: unknown instruction category\n");
-                return -1;
+            continue;
         }
+        else {
+
+            fetch(&cpu, program[PC]);
+
+            Instrn IR = decode(&cpu);
+
+
+        }
+
 
     }
 

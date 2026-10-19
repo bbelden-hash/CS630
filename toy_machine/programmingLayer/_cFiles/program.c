@@ -10,12 +10,13 @@
 
 // opens filename, reads each line in filename, parses each instruction, puts instructions into 'program[]'
 // returns how many instructions were loaded
-int load_program(const char *filename, Instrn *program) {
+int load_program(const char *filename, Instrn *program, LABEL *labels) {
 
     // pointer to .asm file, line in .asm file, and how many lines in the .asm file
     FILE *file;
     char line[256];
     int program_size = 0;
+    int label_size = 0;
 
     file = fopen(filename, "r");
     if (file == NULL) {
@@ -42,9 +43,26 @@ int load_program(const char *filename, Instrn *program) {
         int rs2;
         int i;
         int imm;
+        char label[100];
         // & gives sscanf() the address where it should store the operands
         // did sscanf() pull 2 values, 3 values, or no values?
-        if (sscanf(line, "LOAD_I R%d, %d", &rd, &i) == 2) {
+        if (line[strlen(line) - 1] == ':') {
+
+            LABEL label = {0};
+            Instrn instruction = {0};
+
+            instruction.op = LABELED;
+            instruction.type = NONE;
+
+            program[program_size] = instruction;
+
+            strcpy(label.L, line);
+            label.PC = program_size++;
+
+            labels[label_size] = label;
+            label_size++;
+        }
+        else if (sscanf(line, "LOAD_I R%d, %d", &rd, &i) == 2) {
 
             Instrn instruction = {0};
 
@@ -146,6 +164,64 @@ int load_program(const char *filename, Instrn *program) {
             program[program_size] = instruction;
             program_size++;
         }
+        else if (sscanf(line, "BEQ R%d, R%d, %99s", &rs1, &rs2, label) == 3) {
+
+            Instrn instruction = {0};
+
+            instruction.op = BEQ;
+            instruction.Rs1 = rs1;
+            instruction.Rs2 = rs2;
+            instruction.type = BRANCH;
+
+            program[program_size] = instruction;
+            program_size++;
+        }
+        else if (sscanf(line, "BNE R%d, R%d, %99s", &rs1, &rs2, label) == 3) {
+
+            Instrn instruction = {0};
+
+            instruction.op = BNE;
+            instruction.Rs1 = rs1;
+            instruction.Rs2 = rs2;
+            instruction.type = BRANCH;
+
+            program[program_size] = instruction;
+            program_size++;
+        }
+        else if (sscanf(line, "BLT R%d, R%d, %99s", &rs1, &rs2, label) == 3) {
+
+            Instrn instruction = {0};
+
+            instruction.op = BLT;
+            instruction.Rs1 = rs1;
+            instruction.Rs2 = rs2;
+            instruction.type = BRANCH;
+
+            program[program_size] = instruction;
+            program_size++;
+        }
+        else if (sscanf(line, "BGE R%d, R%d, %99s", &rs1, &rs2, label) == 3) {
+
+            Instrn instruction = {0};
+
+            instruction.op = BGE;
+            instruction.Rs1 = rs1;
+            instruction.Rs2 = rs2;
+            instruction.type = BRANCH;
+
+            program[program_size] = instruction;
+            program_size++;
+        }
+        else if (sscanf(line, "JUMP %99s", label) == 1) {
+
+            Instrn instruction = {0};
+
+            instruction.op = JUMP;
+            instruction.type = BRANCH;
+
+            program[program_size] = instruction;
+            program_size++;
+        } 
         else if (strcmp(line, "HALT") == 0) {
 
             Instrn instruction = {0};
