@@ -48,18 +48,17 @@ int load_program(const char *filename, Instrn *program, LABEL *labels) {
         // did sscanf() pull 2 values, 3 values, or no values?
         if (line[strlen(line) - 1] == ':') {
 
-            LABEL label = {0};
-            Instrn instruction = {0};
+            LABEL new_label = {0};
 
-            instruction.op = LABELED;
-            instruction.type = NONE;
+            size_t len = strlen(line);
+            if (len > 0 && line[len - 1] == ':') {
+                line[len - 1] = '\0';
+            }
 
-            program[program_size] = instruction;
+            strncpy(new_label.L, line, sizeof(new_label.L) - 1);
+            new_label.PC = program_size;
 
-            strcpy(label.L, line);
-            label.PC = program_size++;
-
-            labels[label_size] = label;
+            labels[label_size] = new_label;
             label_size++;
         }
         else if (sscanf(line, "LOAD_I R%d, %d", &rd, &i) == 2) {
@@ -171,6 +170,7 @@ int load_program(const char *filename, Instrn *program, LABEL *labels) {
             instruction.op = BEQ;
             instruction.Rs1 = rs1;
             instruction.Rs2 = rs2;
+            strcpy(instruction.L.L, label);
             instruction.type = BRANCH;
 
             program[program_size] = instruction;
@@ -183,6 +183,7 @@ int load_program(const char *filename, Instrn *program, LABEL *labels) {
             instruction.op = BNE;
             instruction.Rs1 = rs1;
             instruction.Rs2 = rs2;
+            strcpy(instruction.L.L, label);
             instruction.type = BRANCH;
 
             program[program_size] = instruction;
@@ -195,6 +196,7 @@ int load_program(const char *filename, Instrn *program, LABEL *labels) {
             instruction.op = BLT;
             instruction.Rs1 = rs1;
             instruction.Rs2 = rs2;
+            strcpy(instruction.L.L, label);
             instruction.type = BRANCH;
 
             program[program_size] = instruction;
@@ -207,6 +209,7 @@ int load_program(const char *filename, Instrn *program, LABEL *labels) {
             instruction.op = BGE;
             instruction.Rs1 = rs1;
             instruction.Rs2 = rs2;
+            strcpy(instruction.L.L, label);
             instruction.type = BRANCH;
 
             program[program_size] = instruction;
@@ -217,6 +220,7 @@ int load_program(const char *filename, Instrn *program, LABEL *labels) {
             Instrn instruction = {0};
 
             instruction.op = JUMP;
+            strcpy(instruction.L.L, label);
             instruction.type = BRANCH;
 
             program[program_size] = instruction;

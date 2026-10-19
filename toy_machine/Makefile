@@ -8,6 +8,7 @@ OBJECTS = $(OBJDIR)/main.o \
           $(OBJDIR)/initial_state.o \
           $(OBJDIR)/fetch.o \
           $(OBJDIR)/decoder.o \
+		  $(OBJDIR)/resolveLabels.o \
           $(OBJDIR)/program.o \
 		  $(OBJDIR)/executeALU.o \
 		  $(OBJDIR)/executeDATAMOVEMENT.o \
@@ -32,6 +33,9 @@ $(OBJDIR)/fetch.o: programmingLayer/_cFiles/fetch.c | $(OBJDIR)
 
 $(OBJDIR)/decoder.o: programmingLayer/_cFiles/decoder.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/decoder.c -o $@
+
+$(OBJDIR)/resolveLabels.o: programmingLayer/_cFiles/resolveLabels.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/resolveLabels.c -o $@
 
 $(OBJDIR)/program.o: programmingLayer/_cFiles/program.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/program.c -o $@

@@ -40,25 +40,50 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    int PC = 0;
+    resolve_labels(program, program_size, labels, NUM_OF_LABELS);
 
     while (!cpu.halted) {
 
-        if (program[PC].op == LABELED) {
-
-            continue;
-        }
-        else {
-
-            fetch(&cpu, program[PC]);
-
-            Instrn IR = decode(&cpu);
-
-
+        if (cpu.PC < 0 || cpu.PC >= program_size) {
+            fprintf(stderr, "error: PC out of bounds: %d (program size: %d)\n", cpu.PC, program_size);
+            return -1;
         }
 
+        // diagnostic
+        // fprintf(stderr, "PC=%d\n", cpu.PC);
 
+        fetch(&cpu, program[cpu.PC]);
+
+        Instrn IR = decode(&cpu);
+
+        switch(IR.type) {
+
+            case ALU:
+                executeALU(&cpu, IR);
+                break;
+
+            case LOAD_STORE:
+                executeLOADSTORE(&cpu, &ram, IR);
+                break;
+
+            case BRANCH:
+                executeBRANCH(&cpu, IR);
+                break;
+
+            case DATA_MOVEMENT:
+                executeDATAMOVEMENT(&cpu, IR);
+                break;
+
+            case HALTED:
+                executeHALT(&cpu, IR);
+                break;
+
+            default:
+                fprintf(stderr, "error: unknown instruction type\n");
+                return -1;      
+        }
     }
+
 
     for (int i = 0; i < NUM_REGISTERS; i++) {
 

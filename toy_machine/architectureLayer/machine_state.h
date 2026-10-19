@@ -25,7 +25,6 @@ typedef enum {
     BLT, // 10
     BGE, // 11
     JUMP, // 12
-    LABELED, // 13
     HALT // 14
 
 } Opcode;
@@ -36,9 +35,15 @@ typedef enum {
     LOAD_STORE,
     BRANCH,
     DATA_MOVEMENT,
-    NONE,
     HALTED
 } InstrnType;
+
+// labels - a line containing only a name followed by a colon, names the first instruction that comes after it in the file
+typedef struct {
+
+    char L[100]; // label name
+    int PC; // position in array label needs to branch or jump to, an instruction ...
+} LABEL;
 
 // operands - instruction relationship:
 typedef struct {
@@ -51,16 +56,10 @@ typedef struct {
     int Rs2;
     int i; // immediate value
     int imm; // offset
+    LABEL L;
     bool branched; // for decode to determine if a branch is necessary ...
     InstrnType type; // instruction category
 } Instrn;
-
-// labels - a line containing only a name followed by a colon, names the first instruction that comes after it in the file
-typedef struct {
-
-    char L[100]; // label name
-    int PC; // position in array label needs to branch or jump to, an instruction ...
-} LABEL;
 
 // 8 general-purpose registers, 32-bit signed integers -> -2,147,483,648  to  2,147,483,647
 typedef struct {
@@ -69,6 +68,7 @@ typedef struct {
 
     Instrn IR; // instruction register -> program instruction sent to the decoder
     int halted; // if HALT has not happened --> keep running
+    int PC;
 } CPU;
 
 // memory: a flat array of 1024 bytes, addressed 0-1023, all bytes start at zero

@@ -6,6 +6,8 @@
 void fetch(CPU *cpu, Instrn program) {
 
     cpu->IR = program;
+    cpu->PC += 1;
+
 
 }
 

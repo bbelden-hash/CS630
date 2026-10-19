@@ -12,24 +12,29 @@ Instrn decode(CPU *cpu) {
             if (cpu->R[cpu->IR.Rs1] == cpu->R[cpu->IR.Rs2]) {
                 cpu->IR.branched = true;
             }
+            break;
         
         case BNE:
             if (cpu->R[cpu->IR.Rs1] != cpu->R[cpu->IR.Rs2]) {
                 cpu->IR.branched = true;
             }
+            break;
 
         case BLT:
             if (cpu->R[cpu->IR.Rs1] < cpu->R[cpu->IR.Rs2]) {
                 cpu->IR.branched = true;
             }
+            break;
 
         case BGE:
             if (cpu->R[cpu->IR.Rs1] >= cpu->R[cpu->IR.Rs2]) {
                 cpu->IR.branched = true;
             }
+            break;
 
         case JUMP:
             cpu->IR.branched = true;
+            break;
 
         default:
             break;
