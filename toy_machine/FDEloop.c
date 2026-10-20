@@ -26,20 +26,23 @@ int main(int argc, char *argv[]) {
     // if one 'Instrn' holds one instruction, an array of 'Instrn' ...
     Instrn program[MAX_PROGRAM_SIZE];
 
-    // holds all lines consisting of labels from the .asm file
-    // hoping for a maximum of 10 lines consisting of labels in the .asm file
+    // holds all lines consisting of labels from the .asm file, ex: loop:, inner:, etc.
+    // has the ability to hold a maximum number of labels 'NUM_OF_LABELS' -> a macro defined in 'program.h'
     LABEL labels[NUM_OF_LABELS];
 
-    int program_size; // could prevent fetch from running past the loaded program
-    // 'program' now contains all information from the .asm (argv[1])
+    int program_size; // total number of instructions parsed from the .asm file
+    // 'program' now contains all instructions from the .asm (argv[1])
     program_size = load_program(argv[1], program, labels);
 
-    if (program_size == -1) {
+    if (program_size == 0) {
 
         fprintf(stderr, "error: could not open .asm program file in 'load_program'\n");
         return -1;
     }
 
+    // sends the program array full with instructions through another full iteration ...
+    // every branch instruction in 'program' destination labels have been found through first parse in program.c ...
+    // finds the correct PC for execute to use in which branch instruction uses for the branch, jump
     resolve_labels(program, program_size, labels, NUM_OF_LABELS);
 
     while (!cpu.halted) {

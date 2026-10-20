@@ -8,11 +8,11 @@
 
 #include "../program.h"
 
-// opens filename, reads each line in filename, parses each instruction, puts instructions into 'program[]'
+// opens filename, reads each line in filename, parses each instruction, puts instructions into 'program[]', and puts labels into 'labels[]'
 // returns how many instructions were loaded
 int load_program(const char *filename, Instrn *program, LABEL *labels) {
 
-    // pointer to .asm file, line in .asm file, and how many lines in the .asm file
+    // pointer to .asm file, current iterative line in .asm file, how many instructions in the .asm file, how many labels in the .asm file
     FILE *file;
     char line[256];
     int program_size = 0;
@@ -44,8 +44,7 @@ int load_program(const char *filename, Instrn *program, LABEL *labels) {
         int i;
         int imm;
         char label[100];
-        // & gives sscanf() the address where it should store the operands
-        // did sscanf() pull 2 values, 3 values, or no values?
+
         if (line[strlen(line) - 1] == ':') {
 
             LABEL new_label = {0};
@@ -61,6 +60,8 @@ int load_program(const char *filename, Instrn *program, LABEL *labels) {
             labels[label_size] = new_label;
             label_size++;
         }
+        // & gives sscanf() the address where it should store the operands
+        // did sscanf() pull 2 values, 3 values, or no values?
         else if (sscanf(line, "LOAD_I R%d, %d", &rd, &i) == 2) {
 
             Instrn instruction = {0};
@@ -244,6 +245,11 @@ int load_program(const char *filename, Instrn *program, LABEL *labels) {
             fclose(file);
             return -1;
         }
+    }
+
+    if (label_size == 0) {
+
+        fprintf(stderr, "situation: no labels in .asm file for branch instructions to branch, jump to\n");
     }
 
     fclose(file);
