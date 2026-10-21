@@ -1,6 +1,7 @@
-#include <stdint.h>
 
-#include "../../execute.h"
+#include "../include/executioner.h"
+
+#include <stdint.h>
 
 void executeALU(CPU *cpu, Instrn instruction) {
 

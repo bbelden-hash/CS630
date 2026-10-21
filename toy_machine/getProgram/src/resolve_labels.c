@@ -1,7 +1,8 @@
 
+#include "../include/resolve_labeler.h"
+
 #include <stdio.h>
 #include <string.h>
-#include "../decoder.h"
 
 int resolve_labels(Instrn *program, int program_size, LABEL *labels, int label_size) {
 
@@ -17,10 +18,6 @@ int resolve_labels(Instrn *program, int program_size, LABEL *labels, int label_s
         // iterates through all labels from .asm file in labels array
         for (int l = 0; l < label_size; l++) {
 
-            if (labels[l].L[0] == '\0') { // if this index in the labels is empty break -> bcs 'NUM_OF_LABELS' > label_size
-                break;
-            }
-
             if (strcmp(program[p].L.L, labels[l].L) == 0) { // if label in program array assigned to a branch instruction equals the label in the labels array ...
 
                 program[p].L.PC = labels[l].PC; // assign PC to branch, jump to for BRANCH
@@ -30,6 +27,7 @@ int resolve_labels(Instrn *program, int program_size, LABEL *labels, int label_s
         }
 
         if (!found) {
+            
             fprintf(stderr, "error: undefined label: %s\n", program[p].L.L);
             return -1;
         }

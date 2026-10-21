@@ -1,5 +1,5 @@
 
-#include "../decoder.h"
+#include "../include/decoder.h"
 
 // takes the CPU struct from the fetcher and determines: if the IR instruction type is of type branch -> if the conditions are met, assign branched to true
 Instrn decode(CPU *cpu) {
@@ -42,6 +42,5 @@ Instrn decode(CPU *cpu) {
     }
 
     return cpu->IR;
-
 }
 // returns the instruction with its operations and operands from the CPU to be used in the execute ...

@@ -1,0 +1,7 @@
+#ifndef PROGRAM_CONFIG_H
+#define PROGRAM_CONFIG_H
+
+#define MAX_PROGRAM_SIZE 1000
+#define MAX_LABELS 100
+
+#endif

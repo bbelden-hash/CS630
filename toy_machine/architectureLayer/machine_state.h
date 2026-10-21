@@ -26,7 +26,6 @@ typedef enum {
     BGE, // 11
     JUMP, // 12
     HALT // 14
-
 } Opcode;
 
 typedef enum {
@@ -41,7 +40,7 @@ typedef enum {
 // labels - a line containing only a name followed by a colon, names the first instruction that comes after it in the file
 typedef struct {
 
-    char L[100]; // label name
+    char L[20]; // label name
     int PC; // position in .asm branch instruction needs to branch or jump to
 } LABEL;
 
@@ -78,5 +77,3 @@ typedef struct {
 } MEM;
 
 #endif
-
-

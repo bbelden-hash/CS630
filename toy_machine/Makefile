@@ -7,9 +7,11 @@ OBJDIR = obj
 OBJECTS = $(OBJDIR)/main.o \
           $(OBJDIR)/initial_state.o \
           $(OBJDIR)/fetch.o \
-          $(OBJDIR)/decoder.o \
-		  $(OBJDIR)/resolveLabels.o \
-          $(OBJDIR)/program.o \
+          $(OBJDIR)/decode.o \
+		  $(OBJDIR)/resolve_labels.o \
+          $(OBJDIR)/instruction_parser.o \
+		  $(OBJDIR)/program_build.o \
+		  $(OBJDIR)/program_loader.o \
 		  $(OBJDIR)/executeALU.o \
 		  $(OBJDIR)/executeDATAMOVEMENT.o \
 		  $(OBJDIR)/executeLOADSTORE.o \
@@ -28,32 +30,38 @@ $(OBJDIR)/main.o: FDEloop.c | $(OBJDIR)
 $(OBJDIR)/initial_state.o: architectureLayer/initial_state.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c architectureLayer/initial_state.c -o $@
 
-$(OBJDIR)/fetch.o: programmingLayer/_cFiles/fetch.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/fetch.c -o $@
+$(OBJDIR)/fetch.o: letsPipeline/src/fetch.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c letsPipeline/src/fetch.c -o $@
 
-$(OBJDIR)/decoder.o: programmingLayer/_cFiles/decoder.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/decoder.c -o $@
+$(OBJDIR)/decode.o: letsPipeline/src/decode.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c letsPipeline/src/decode.c -o $@
 
-$(OBJDIR)/resolveLabels.o: programmingLayer/_cFiles/resolveLabels.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/resolveLabels.c -o $@
+$(OBJDIR)/resolve_labels.o: getProgram/src/resolve_labels.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c getProgram/src/resolve_labels.c -o $@
 
-$(OBJDIR)/program.o: programmingLayer/_cFiles/program.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/program.c -o $@
+$(OBJDIR)/instruction_parser.o: getProgram/src/instruction_parser.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c getProgram/src/instruction_parser.c -o $@
 
-$(OBJDIR)/executeALU.o: programmingLayer/_cFiles/execute/executeALU.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/execute/executeALU.c -o $@
+$(OBJDIR)/program_build.o: getProgram/src/program_build.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c getProgram/src/program_build.c -o $@
 
-$(OBJDIR)/executeDATAMOVEMENT.o: programmingLayer/_cFiles/execute/executeDATAMOVEMENT.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/execute/executeDATAMOVEMENT.c -o $@
+$(OBJDIR)/program_loader.o: getProgram/src/program_loader.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c getProgram/src/program_loader.c -o $@
 
-$(OBJDIR)/executeLOADSTORE.o: programmingLayer/_cFiles/execute/executeLOADSTORE.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/execute/executeLOADSTORE.c -o $@
+$(OBJDIR)/executeALU.o: letsPipeline/src/executeALU.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c letsPipeline/src/executeALU.c -o $@
 
-$(OBJDIR)/executeBRANCH.o: programmingLayer/_cFiles/execute/executeBRANCH.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/execute/executeBRANCH.c -o $@
+$(OBJDIR)/executeDATAMOVEMENT.o: letsPipeline/src/executeDATAMOVEMENT.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c letsPipeline/src/executeDATAMOVEMENT.c -o $@
 
-$(OBJDIR)/executeHALT.o: programmingLayer/_cFiles/execute/executeHALT.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c programmingLayer/_cFiles/execute/executeHALT.c -o $@
+$(OBJDIR)/executeLOADSTORE.o: letsPipeline/src/executeLOADSTORE.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c letsPipeline/src/executeLOADSTORE.c -o $@
+
+$(OBJDIR)/executeBRANCH.o: letsPipeline/src/executeBRANCH.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c letsPipeline/src/executeBRANCH.c -o $@
+
+$(OBJDIR)/executeHALT.o: letsPipeline/src/executeHALT.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c letsPipeline/src/executeHALT.c -o $@
 
 clean:
 	rm -rf $(OBJDIR) $(TARGET)

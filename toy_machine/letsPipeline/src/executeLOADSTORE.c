@@ -1,7 +1,8 @@
+
+#include "../include/executioner.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "../../execute.h"
 
 // little-endian style -> lowest memory address holds the least-significant byte (rightmost 8 bits)
 // decided to implement wraparound behavior so -> LOAD R3, -4(R0) will give you the 4 byte int stored in M[1021], M[1022], M[1023], M[0] if R0 is 1, ...
