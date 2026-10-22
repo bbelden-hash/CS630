@@ -31,6 +31,7 @@ int main(int argc, char *argv[]) {
     BHT bht;
     BranchPredictors predictor; // changes values as the program runs, represents the current guess from each branch predictor, only guesses upon a instruction of type BRANCH
     MisPrediction mispredictions = {0}; // total number of mispredictions from all branch predictors
+    Record record = {0}; // records number of conditional branches executed and how many of those branches were taken
 
     initialize_machine(&cpu);
     initialize_MEM(&ram);
@@ -77,7 +78,7 @@ int main(int argc, char *argv[]) {
             // find the predicition values for all of the branch predictors
 
             predictor.NT = NT();
-            predictor.BTFN = BFTN(predict.branch, predict.target);
+            predictor.BTFN = BTFN(predict.branch, predict.target);
             predictor.BHT_1BIT = calculate_1BIT_use(predict.branch, bht.BHT_1BIT);
             predictor.BHT_2BIT = calculate_2BIT_use(predict.branch, bht.BHT_2BIT);
         }
@@ -94,6 +95,12 @@ int main(int argc, char *argv[]) {
 
             case BRANCH: // returns 1 if branch is taken, 0 if branch is not taken
                 taken = executeBRANCH(&cpu, IR);
+                record.BRANCHES += 1;
+
+                if (taken == 1) {
+
+                    record.TAKEN += 1;
+                }
                 break;
 
             case DATA_MOVEMENT:
@@ -125,6 +132,8 @@ int main(int argc, char *argv[]) {
         fprintf(stdout, "R%d=%d\n", i, cpu.R[i]);
     }
 
+    fprintf(stdout, "BRANCHES=%d\n", record.BRANCHES);
+    fprintf(stdout, "TAKEN=%d\n", record.TAKEN);
     fprintf(stdout, "MISS_NT=%d\n", mispredictions.MISS_NT);
     fprintf(stdout, "MISS_BTFN=%d\n", mispredictions.MISS_BTFN);
     fprintf(stdout, "MISS_1BIT=%d\n", mispredictions.MISS_1BIT);
@@ -135,6 +144,9 @@ int main(int argc, char *argv[]) {
 
         // fprintf(stdout, "MEM[%d]=%d\n", i, ram.M[i]);
     // }
+
+    float percentage = (float)record.TAKEN / record.BRANCHES;
+    fprintf(stdout, "\npercentage of how many of the total number of branches were TAKEN: %f\n", percentage);
 
     return 0;
 }

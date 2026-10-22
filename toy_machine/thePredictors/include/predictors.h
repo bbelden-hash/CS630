@@ -55,8 +55,14 @@ typedef struct {
     int BHT_2BIT;
 } BranchPredictors;
 
+typedef struct {
+
+    int BRANCHES;
+    int TAKEN;
+} Record;
+
 int NT(void);
-int BFTN(int branch, int target);
+int BTFN(int branch, int target);
 void initialize_BHT(BHT *tables);
 int calculate_1BIT_use(int branchPC, OneBit *table_1BIT);
 int calculate_2BIT_use(int branchPC, TwoBit *table_2BIT);

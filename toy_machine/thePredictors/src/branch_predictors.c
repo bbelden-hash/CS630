@@ -15,7 +15,7 @@ int NT(void) {
 }
 
 // if the branch requires moving back up the array, predict taken
-int BFTN(int branch, int target) {
+int BTFN(int branch, int target) {
     
     // target: location of label PC BRANCH uses to branch, jump to
     // branch: location of the actual BRANCH instruction, PC
