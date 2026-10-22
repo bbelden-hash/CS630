@@ -16,7 +16,8 @@ OBJECTS = $(OBJDIR)/main.o \
 		  $(OBJDIR)/executeDATAMOVEMENT.o \
 		  $(OBJDIR)/executeLOADSTORE.o \
 		  $(OBJDIR)/executeBRANCH.o \
-		  $(OBJDIR)/executeHALT.o
+		  $(OBJDIR)/executeHALT.o \
+		  $(OBJDIR)/branch_predictors.o
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET)
@@ -62,6 +63,9 @@ $(OBJDIR)/executeBRANCH.o: letsPipeline/src/executeBRANCH.c | $(OBJDIR)
 
 $(OBJDIR)/executeHALT.o: letsPipeline/src/executeHALT.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c letsPipeline/src/executeHALT.c -o $@
+
+$(OBJDIR)/branch_predictors.o: thePredictors/src/branch_predictors.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c thePredictors/src/branch_predictors.c -o $@
 
 clean:
 	rm -rf $(OBJDIR) $(TARGET)

@@ -15,6 +15,9 @@
 #include "letsPipeline/include/decoder.h"
 #include "letsPipeline/include/executioner.h"
 
+// relative path to header for branch predictors
+#include "thePredictors/include/predictors.h"
+
 int main(int argc, char *argv[]) {
 
     if (argc != 2) {
@@ -25,8 +28,13 @@ int main(int argc, char *argv[]) {
 
     CPU cpu;
     MEM ram;
+    BHT bht;
+    BranchPredictors predictor; // changes values as the program runs, represents the current guess from each branch predictor, only guesses upon a instruction of type BRANCH
+    MisPrediction mispredictions = {0}; // total number of mispredictions from all branch predictors
+
     initialize_machine(&cpu);
     initialize_MEM(&ram);
+    initialize_BHT(&bht); // all indices in 1BIT = 0, all indices in 2BIT = 1
     
     Instrn program[MAX_PROGRAM_SIZE]; // holds the entire program from the .asm (minus the lines consisting of labels), type struct Instrn
     LABEL labels[MAX_LABELS]; // holds all lines consisting of labels from the .asm file, ex: loop:, inner:, etc.
@@ -41,7 +49,7 @@ int main(int argc, char *argv[]) {
     }
 
     // sends the program array full with instructions through another full iteration ...
-    // every branch instruction in 'program' destination labels have been found through first parse in program.c ...
+    // every branch instruction in 'program' destination labels have been found through first parse in program_loader.c ...
     // finds the correct PC for execute to use in which branch instruction uses for the branch, jump
     if (resolve_labels(program, program_size, labels, label_size) != 0) {
 
@@ -57,9 +65,22 @@ int main(int argc, char *argv[]) {
             return -1;
         }
 
-        fetch(&cpu, program[cpu.PC]);
+        int taken; // 1 -> if a branch is taken, 0 -> if a branch is not taken
+        PC predict = {0}; // every iteration of the while loop the branchPC resets to 0, targetPC resets to 0
 
-        Instrn IR = decode(&cpu);
+        fetch(&cpu, program[cpu.PC], &predict);
+
+        Instrn IR = decode(&cpu, &predict);
+
+        if (IR.type == BRANCH) {
+            // if the current instruction sending to execute is of type BRANCH
+            // find the predicition values for all of the branch predictors
+
+            predictor.NT = NT();
+            predictor.BTFN = BFTN(predict.branch, predict.target);
+            predictor.BHT_1BIT = calculate_1BIT_use(predict.branch, bht.BHT_1BIT);
+            predictor.BHT_2BIT = calculate_2BIT_use(predict.branch, bht.BHT_2BIT);
+        }
 
         switch(IR.type) {
 
@@ -71,8 +92,8 @@ int main(int argc, char *argv[]) {
                 executeLOADSTORE(&cpu, &ram, IR);
                 break;
 
-            case BRANCH:
-                executeBRANCH(&cpu, IR);
+            case BRANCH: // returns 1 if branch is taken, 0 if branch is not taken
+                taken = executeBRANCH(&cpu, IR);
                 break;
 
             case DATA_MOVEMENT:
@@ -87,12 +108,27 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "error: unknown instruction type\n");
                 return -1;      
         }
+
+        if (IR.type == BRANCH) {
+            // checks if the predictions predicted by the branch predictors is correct ...
+            // if not correct for a particular predictors prediction -> particular predictors misprediction variable is incremented by one
+            // values in branch tables updated as well to reflect the output value of taken ...
+
+            check_prediction(taken, &predictor, &mispredictions);
+            update_1BIT_index(taken, predict.branch, bht.BHT_1BIT);
+            update_2BIT_index(taken, predict.branch, bht.BHT_2BIT);
+        }
     }
 
     for (int i = 0; i < NUM_REGISTERS; i++) {
 
         fprintf(stdout, "R%d=%d\n", i, cpu.R[i]);
     }
+
+    fprintf(stdout, "MISS_NT=%d\n", mispredictions.MISS_NT);
+    fprintf(stdout, "MISS_BTFN=%d\n", mispredictions.MISS_BTFN);
+    fprintf(stdout, "MISS_1BIT=%d\n", mispredictions.MISS_1BIT);
+    fprintf(stdout, "MISS_2BIT=%d\n", mispredictions.MISS_2BIT);
 
     // printf("\n");
     // for (int i = 0; i < NUM_MEM_LOCATIONS; i++) {

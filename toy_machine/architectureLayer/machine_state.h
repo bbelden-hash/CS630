@@ -41,7 +41,7 @@ typedef enum {
 typedef struct {
 
     char L[20]; // label name
-    int PC; // position in .asm branch instruction needs to branch or jump to
+    int PC; // instruction in .asm branch instruction needs to branch or jump to
 } LABEL;
 
 // operands - instruction relationship:
