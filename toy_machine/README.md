@@ -1,19 +1,6 @@
 MY TINY CPU!
 LEGIT LITTLE PROCESSOR SIMULATOR!
 
-Building my toy_machine in layers:
-
-    1. Machine state
-    2. Program storage
-    3. Read/parse .asm file
-    4. Fetch
-    5. Decode
-    6. Execute
-    7. FDE loop
-    8. Print final registers
-    9. Compile/text
-    10. Handle edge cases
-
 FDEloop.c
 - int main(int argc, char *argv[])
     * main function (driver), takes the 'terminal' as parameters to the function ...
@@ -21,15 +8,24 @@ FDEloop.c
     * argv are the actual sequence of char inputs typed by the user to the terminal, each input is separated by a ' ' and each 'word' is placed into an array of chars
     * a struct 'CPU' object is created from 'machine_state.h' and every item in the struct is initialized to zero
     * a struct 'MEM' object is created from 'machine_state.h' and every index in the memory array from the struct is initialized to zero
+    * a struct 'BHT' object is created from 'predictors.h', this contains two branch tables of size 16 representing the 1BIT and 2BIT predictors
+    * a struct 'BranchPredictors' object is created from 'predictors.h', this changes values as the program runs, represents the current guess from each branch predictor
+    * a struct 'MisPrediction' object is created from 'predictors.h', this contains all branch predictors total number of mispredicitions calculated throughout the program
+    * a struct 'Record' object is created from 'predictors.h', this containes variables BRANCHES and TAKEN -> represents the total number of branches and the number within that total taken
     * an array of 'Instrn' struct objects is created, given the variable name 'program'
+    * an array of 'LABEL' struct objects is created, given the variable name 'labels'
     * a variable called 'program_size' is created, this will represent the number of lines (instructions) parsed from the .asm file (argv[1])
-    * a function called 'load_program' is called using the .asm file (argv[1]) and the 'program' array as input parameters, it is assigned to the variable program_size
-    * 'load_program' will parse the input .asm file line by line, placing each line (struct 'Instrn' object) from argv[1] as an index in the 'program' array -> it returns the number of lines parsed ('program_size')
+    * a variable called 'label_size' is created, this will represent the number of label lines parsed from the .asm file (argv[1])
+    * a variable called 'taken' is created, taken's value flunctuates -> 1 if a branch instruction is taken and 0 if a branch instruction is not taken
+    * a function called 'load_program' is called using the .asm file (argv[1]), the 'program' array, the 'labels' array, and pointers to 'program_size' and 'label_size' as input parameters
+    * 'load_program' will parse the input .asm file line by line, placing each line (struct 'Instrn' object) from argv[1] as an index in the 'program' array
     * upon return from 'load_program', the 'program' array will consist of every instruction the processor needs to complete from the .asm file
+    * a function called 'resolve_labels' is called -> sends the full program array through another full cycle; this allows the assignment of the correct PC branching instructions need to branch to
     * if the 'cpu' is not 'HALTED' meaning a particular index in the 'program' arrays 'instruction.op' == 'HALT' or another way to interpret it is a line in the .asm file consists of 'HALT', then ...
     * iterate through the 'program' arrays 'Instrn' objects and perform the necessary steps for each instruction in the .asm file to complete successfully ...
     * call the fetch, decode, and corresponding instruction types (ALU, branch, data movement, load-store, etc.) execute function
-    * upon an 'instruction.op' of 'HALT', exit the 'while' loop and print the values currently sitting in all created registers in the 'CPU' struct from the 'machine_state.h' file
+    * if the current instruction type is BRANCH, then assign proper predicition values to all predictors and check correctness -> if incorrect, increment the corresponding predictors misprediction variable
+    * upon an 'instruction.op' of 'HALT', exit the 'while' loop and print the values: currently sitting in all created registers in the 'CPU' struct from the 'machine_state.h' file, how many total branches were their within the program, how many of those branches were taken, and the total misprediction values from all four branch predictors
 
 
 architectureLayer
@@ -51,11 +47,17 @@ architectureLayer
         * STORE
         * LOAD_B
         * STORE_B
+        * BEQ
+        * BNE
+        * BLT
+        * BGE
+        * JUMP
         * HALT
     - struct InstrnType:
         * ALU
         * LOAD_STORE
         * BRANCH
+        * JUMPING
         * DATA_MOVEMENT
         * HALTED
     - struct Instrn
@@ -67,57 +69,40 @@ architectureLayer
         * Rs2 - a source register (2) for ALU instruction type
         * i - immediate value assigned to a register through 'LOAD_I'
         * imm - the displacement offset incremented or decremented to the base register for load, store operations
+        * L.L - a label associated with a branch instruction
+        * L.PC - the PC the branch instruction needs to branch to if taken
+        * branched - a boolean -> true if branch condition holds true, false otherwise
         * type - the genre of instruction
 
 2) Initial State: 'initial_state.c', 'initial_state.h'
     - files are responsible for initializing all objects in 'CPU' struct and 'MEM' struct from 'machine_state.h' to zero
 
-programmingLayer
+getProgram
 
-3) Program Housing: 'program.c'
-    - int load_program(const char *filename, Instrn *program)
-        * function takes a pointer to an .asm file (argv[1]) and an array with each index being of type struct Instrn
-        * .asm file read line by line, blank lines are ignored and lines beginning with '#' are ignored
-        * each line in .asm file is an instruction consisting of operands and an operation
-        * each line in .asm file is parsed and saved as an index in the 'program' array
-        * file is closed
+3) program_loader -> pulls the next line from the file and sends to the instruction parser file -> upon return from the instruction parser, file is sent to the program build file
+4) instruction_parser -> splits the line into tokens, sends each token to check for validity -> if valid fills a Instrn struct object with the line
+5) program_build -> puts the Instrn struct object filled with the line into the 'program' array as an index
+6) resolve_labels -> iterates through the full 'program' array created, assigns branching instructions target PC to its corresponding labels PC
 
-4) Fetcher: 'fetch.c'
-    - void fetch(CPU *cpu, Instrn *program)
-        * function takes a pointer to a struct 'CPU' from 'machine_state.h' in memory and a pointer to a struct 'Instrn' from 'machine_state.h' in memory
-        * both pointers point to the address of its very first member in each struct
-        * finds the index in the 'program' array corresponding to the current PC number
-        * assigns this index of type 'Instrn' to one of struct 'CPU's objects - the instruction register (IR)
-        * IR is the pass between fetch and decode
-        * increments the PC by one
+letsPipeline
 
-5) Decoder: 'decoder.c'
-    - Instrn decode(Instrn IR)
-        * function takes the instruction register assigned to cpu->IR in the fetch stage as a parameter
-        * decode receives this object and returns it
+7) fetch -> gets the IR, if the IR type is BRANCH -> assigns the branchPC to the current cpu PC (for BTFN), and increments the cpu PC by one
+8) decode -> returns the IR to be used in main and determines if a branch is valid if the IR happens to be a branch instruction
+9) execute(s) -> performs the necessary operations to successfully complete the instruction
 
-6) Executer: dir 'execute'
-    - void executeALU(CPU *cpu, Instrn instruction)
-        * function takes a pointer to a struct 'CPU' from 'machine_state.h' in memory and a struct 'Instrn' from 'machine_state.h' called instruction
-        * the instruction type required to initiate this function is an instruction that utilizes the ALU requiring computation
-        * operations could be 'ADD', 'SUB', 'AND', 'OR', 'XOR'
-    - void executeBRANCH(CPU *cpu, Instrn instruction)
-        * function takes a pointer to a struct 'CPU' from 'machine_state.h' in memory and a struct 'Instrn' from 'machine_state.h' called instruction
-        * TBD: will take 'branching' instructions
-    - void executeDATAMOVEMENT(CPU *cpu, Instrn instruction)
-        * function takes a pointer to a struct 'CPU' from 'machine_state.h' in memory and a struct 'Instrn' from 'machine_state.h' called instruction
-        * instructions with data movement, instructions are processor commands that copy data between registers or load an immediate value
-        * consist of operations like 'MOVE' or 'LOAD_I'
-    - executeLOADSTORE.c
-        * int wrapAddress(int address)
-            * function takes the base memory address for operations like 'STORE' or 'LOAD'
-            * confirms all memory addresses are valid and consecutive using a wrap around technique if required
-        * void executeLOADSTORE(CPU *cpu, MEM *ram, Instrn instruction)
-            * function takes a pointer to a struct 'CPU' from 'machine_state.h' in memory, a struct 'Instrn' from 'machine_state.h' called instruction, and a pointer to a struct 'MEM' from 'machine_state.h' in memory
-            * responsible for load and store operations
-            * utilizes the memory array for storage and loading from
-            * utilizes the cpu to acquire base addresses and offsets to find proper locations in 'MEM'
+thePredictors
 
+10) NT -> always predicts not taken for a branch
+11) BFTN -> predicts taken if the branch is at or before the branch (target PC <= branch PC), and not taken otherwise
+12) 1BIT -> branch history table of 16 entries, each holding a single bit (the last outcome seen) ...
+            the branch at PC p uses entry p mod 16 ...
+            it predicts whatever that entry holds, and after the branch executes the entry is set to the actual outcome ...
+            all entries start at not taken
+13) 2BIT ->  separate 16-entry branch history table ...
+             indexed the same way, where each entry is a counter from 0 to 3 ...
+             predicts taken if the counter is >= 2 and not taken otherwise ...
+             after branch executes, counter goes up by 1 if the branch was taken and down by 1 if it was not, staying between 0 and 3 ...
+             all entries start at 1
 
 -> To Compile: 
     1) make clean
@@ -142,16 +127,16 @@ For Docker:
 
 My hw_check.sh most recent output ->
 
-    PASS  input-1      SUB: Rd <- Rs1 - Rs2, positive and negative results
-    PASS  input-2      MOVE: copy a register, source is left unchanged
-    PASS  input-4      handout example 1: store two words, load them back, SUB, MOVE
-    PASS  input-5      handout example 2: four STORE_B bytes read back as one little-endian word
-    PASS  input-6      memory starts zeroed: loads from untouched addresses give 0
-    PASS  input-7      STORE a word, then LOAD_B each byte: little-endian byte order
-    PASS  input-9      LOAD_B zero-extends: a stored 0xFF byte loads as 255, not -1
-    PASS  input-10     STORE_B writes only the low 8 bits of the register
-    PASS  input-11     overwrite a word: a later LOAD sees the newer STORE
-    PASS  input-13     SUB wraps around (two's complement): MIN - 1 and 0 - MIN
+    PASS  input-1      HW1 regression: no branches, all six statistics lines print 0
+    PASS  input-2      handout example 1: sum 1..10 with one backward BLT
+    PASS  input-3      handout example 2: nested loop with an if inside (count i != j)
+    PASS  input-4      JUMP forward skips code and is not counted as a conditional branch
+    PASS  input-5      BEQ and BNE, each once taken and once not taken (forward targets)
+    PASS  input-6      BLT/BGE compare signed: -1 < 0 and -5 < -2
+    PASS  input-7      forward-referenced labels, and two labels naming the same instruction
+    PASS  input-8      while loop: top-test BGE exit plus bottom JUMP (JUMP is not counted)
+    PASS  input-9      countdown loop closed by a backward BNE
+    PASS  input-10     BGE with equal operands is taken; BLT with equal operands is not
 
 10/10 public sample cases passed
 
