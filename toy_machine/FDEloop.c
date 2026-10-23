@@ -42,6 +42,7 @@ int main(int argc, char *argv[]) {
 
     int program_size;
     int label_size;
+    int taken; // 1 -> if a branch is taken, 0 -> if a branch is not taken
 
     if (load_program(argv[1], program, labels, &program_size, &label_size) != 0) {
 
@@ -66,7 +67,6 @@ int main(int argc, char *argv[]) {
             return -1;
         }
 
-        int taken; // 1 -> if a branch is taken, 0 -> if a branch is not taken
         PC predict = {0}; // every iteration of the while loop the branchPC resets to 0, targetPC resets to 0
 
         fetch(&cpu, program[cpu.PC], &predict);
@@ -107,6 +107,10 @@ int main(int argc, char *argv[]) {
                 executeDATAMOVEMENT(&cpu, IR);
                 break;
 
+            case JUMPING:
+                executeJUMP(&cpu, IR);
+                break;
+
             case HALTED:
                 executeHALT(&cpu, IR);
                 break;
@@ -145,8 +149,8 @@ int main(int argc, char *argv[]) {
         // fprintf(stdout, "MEM[%d]=%d\n", i, ram.M[i]);
     // }
 
-    float percentage = (float)record.TAKEN / record.BRANCHES;
-    fprintf(stdout, "\npercentage of how many of the total number of branches were TAKEN: %f\n", percentage);
+    // float percentage = (float)record.TAKEN / record.BRANCHES;
+    // fprintf(stdout, "\npercentage of how many of the total number of branches were TAKEN: %f\n", percentage);
 
     return 0;
 }

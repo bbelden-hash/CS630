@@ -41,12 +41,6 @@ Instrn decode(CPU *cpu, PC *predict) {
             }
             break;
 
-        case JUMP:
-            predict->target = cpu->IR.L.PC;
-
-            cpu->IR.branched = true;
-            break;
-
         default:
             break;
             

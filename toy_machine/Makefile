@@ -17,6 +17,7 @@ OBJECTS = $(OBJDIR)/main.o \
 		  $(OBJDIR)/executeLOADSTORE.o \
 		  $(OBJDIR)/executeBRANCH.o \
 		  $(OBJDIR)/executeHALT.o \
+		  $(OBJDIR)/executeJUMP.o \
 		  $(OBJDIR)/branch_predictors.o
 
 $(TARGET): $(OBJECTS)
@@ -63,6 +64,9 @@ $(OBJDIR)/executeBRANCH.o: letsPipeline/src/executeBRANCH.c | $(OBJDIR)
 
 $(OBJDIR)/executeHALT.o: letsPipeline/src/executeHALT.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c letsPipeline/src/executeHALT.c -o $@
+
+$(OBJDIR)/executeJUMP.o: letsPipeline/src/executeJUMP.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c letsPipeline/src/executeJUMP.c -o $@
 
 $(OBJDIR)/branch_predictors.o: thePredictors/src/branch_predictors.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c thePredictors/src/branch_predictors.c -o $@

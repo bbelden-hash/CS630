@@ -9,7 +9,7 @@ int resolve_labels(Instrn *program, int program_size, LABEL *labels, int label_s
     // iterates through all instructions in program array
     for (int p = 0; p < program_size; p++) {
 
-        if (program[p].type != BRANCH) { // only applies to instructions of type BRANCH
+        if (program[p].type != BRANCH && program[p].type != JUMPING) { // only applies to instructions of types BRANCH, JUMP
             continue;
         }
 

@@ -85,7 +85,7 @@ static int parse_register(const char *token, int *reg) {
         return -1;
     }
 
-    if (token[1] == '\0') { // register has a number
+    if (token[1] == '\0') { // register has to have a number
 
         return -1;
     }
@@ -131,6 +131,63 @@ static int parse_integer(const char *token, int *value) {
     }
 
     *value = (int)parsed;
+    return 0;
+}
+
+static int parse_offset_reg(const char *token, int *Rb, int *imm) {
+
+    if (token == NULL || Rb == NULL || imm == NULL) {
+        return -1;
+    }
+
+    char *copy = malloc(strlen(token) + 1);
+    if (copy == NULL) {
+        return -1;
+    }
+    strcpy(copy, token);
+
+    long parsed1;
+    long parsed2;
+    char *start;
+    char *end;
+
+    char *open = strchr(copy, '(');
+    char *close = strchr(copy, ')');
+
+    if (open == NULL || close == NULL || open >= close || strchr(open + 1, '(') != NULL || strchr(close + 1, ')') != NULL) {
+        free(copy);
+        return -1;
+    }
+
+    *open = '\0';
+    start = copy;
+
+    parsed2 = strtol(start, &end, 10);
+
+    if (start == end || *end != '\0' || parsed2 < INT_MIN || parsed2 > INT_MAX) {
+        free(copy);
+        return -1;
+    }
+
+    *close = '\0';
+    start = open + 1;
+
+    if (*start != 'R') {
+        free(copy);
+        return -1;
+    }
+
+    parsed1 = strtol(start + 1, &end, 10);
+
+    if (start + 1 == end || *end != '\0' || parsed1 < 0 || parsed1 >= REGISTER_COUNT) {
+        free(copy);
+        return -1;
+    }
+
+    *Rb = (int)parsed1;
+    *imm = (int)parsed2;
+
+    free(copy);
     return 0;
 }
 
@@ -354,7 +411,7 @@ ParseResult parse_line(const char *line, Instrn *instruction, LABEL *label) {
 
     // LOAD, LOAD_B
     else if (strcmp(tokens[0], "LOAD") == 0 || strcmp(tokens[0], "LOAD_B") == 0) {
-        if (count != 4 || parse_register(tokens[1], &instruction->Rd) != 0 || parse_register(tokens[2], &instruction->Rb) != 0 || parse_integer(tokens[3], &instruction->imm) != 0) { // assign necessary operands, operations
+        if (count != 3 || parse_register(tokens[1], &instruction->Rd) != 0 || parse_offset_reg(tokens[2], &instruction->Rb, &instruction->imm) != 0) { // assign necessary operands, operations
 
             return PARSE_ERROR;
         }
@@ -365,7 +422,7 @@ ParseResult parse_line(const char *line, Instrn *instruction, LABEL *label) {
 
     // STORE, STORE_B
     else if (strcmp(tokens[0], "STORE") == 0 || strcmp(tokens[0], "STORE_B") == 0) {
-        if (count != 4 || parse_register(tokens[1], &instruction->Rs) != 0 || parse_register(tokens[2], &instruction->Rb) != 0 || parse_integer(tokens[3], &instruction->imm) != 0) { // assign necessary operands, operations
+        if (count != 3 || parse_register(tokens[1], &instruction->Rs) != 0 || parse_offset_reg(tokens[2], &instruction->Rb, &instruction->imm) != 0) { // assign necessary operands, operations
 
             return PARSE_ERROR;
         }
@@ -405,7 +462,7 @@ ParseResult parse_line(const char *line, Instrn *instruction, LABEL *label) {
         }
 
         instruction->op = JUMP;
-        instruction->type = BRANCH;
+        instruction->type = JUMPING;
     }
 
     // HALT

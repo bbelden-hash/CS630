@@ -41,15 +41,6 @@ int executeBRANCH(CPU *cpu, Instrn instruction) {
             cpu->PC = instruction.L.PC;
         }
     }
-    // PC == L, ...
-    else if (instruction.op == JUMP) {
-
-        if (instruction.branched) {
-            taken = 1;
-
-            cpu->PC = instruction.L.PC;
-        }
-    }
 
     return taken;
 }

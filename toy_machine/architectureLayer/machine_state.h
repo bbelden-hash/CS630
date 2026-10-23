@@ -33,6 +33,7 @@ typedef enum {
     ALU,
     LOAD_STORE,
     BRANCH,
+    JUMPING,
     DATA_MOVEMENT,
     HALTED
 } InstrnType;
