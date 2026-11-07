@@ -1,24 +1,20 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11
 
-TARGET = FDEloop
+TARGET = main
 OBJDIR = obj
 
 OBJECTS = $(OBJDIR)/main.o \
-          $(OBJDIR)/initial_state.o \
           $(OBJDIR)/fetch.o \
           $(OBJDIR)/decode.o \
-		  $(OBJDIR)/resolve_labels.o \
-          $(OBJDIR)/instruction_parser.o \
-		  $(OBJDIR)/program_build.o \
+		  $(OBJDIR)/execute.o \
+          $(OBJDIR)/mem.o \
+		  $(OBJDIR)/writeback.o \
+		  $(OBJDIR)/instruction_parser.o \
 		  $(OBJDIR)/program_loader.o \
-		  $(OBJDIR)/executeALU.o \
-		  $(OBJDIR)/executeDATAMOVEMENT.o \
-		  $(OBJDIR)/executeLOADSTORE.o \
-		  $(OBJDIR)/executeBRANCH.o \
-		  $(OBJDIR)/executeHALT.o \
-		  $(OBJDIR)/executeJUMP.o \
-		  $(OBJDIR)/branch_predictors.o
+		  $(OBJDIR)/branch_predictors.o \
+		  $(OBJDIR)/utils.o \
+		  $(OBJDIR)/label.o
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET)
@@ -26,50 +22,39 @@ $(TARGET): $(OBJECTS)
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
-$(OBJDIR)/main.o: FDEloop.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c FDEloop.c -o $@
+$(OBJDIR)/main.o: main.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c main.c -o $@
 
-$(OBJDIR)/initial_state.o: architectureLayer/initial_state.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c architectureLayer/initial_state.c -o $@
+$(OBJDIR)/fetch.o: pipeline/stages/fetch.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c pipeline/stages/fetch.c -o $@
 
-$(OBJDIR)/fetch.o: letsPipeline/src/fetch.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c letsPipeline/src/fetch.c -o $@
+$(OBJDIR)/decode.o: pipeline/stages/decode.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c pipeline/stages/decode.c -o $@
 
-$(OBJDIR)/decode.o: letsPipeline/src/decode.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c letsPipeline/src/decode.c -o $@
+$(OBJDIR)/execute.o: pipeline/stages/execute.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c pipeline/stages/execute.c -o $@
 
-$(OBJDIR)/resolve_labels.o: getProgram/src/resolve_labels.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c getProgram/src/resolve_labels.c -o $@
+$(OBJDIR)/mem.o: pipeline/stages/mem.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c pipeline/stages/mem.c -o $@
 
-$(OBJDIR)/instruction_parser.o: getProgram/src/instruction_parser.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c getProgram/src/instruction_parser.c -o $@
+$(OBJDIR)/writeback.o: pipeline/stages/wb.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c pipeline/stages/wb.c -o $@
 
-$(OBJDIR)/program_build.o: getProgram/src/program_build.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c getProgram/src/program_build.c -o $@
+$(OBJDIR)/instruction_parser.o: program/get_program/instruction_parser.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c program/get_program/instruction_parser.c -o $@
 
-$(OBJDIR)/program_loader.o: getProgram/src/program_loader.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c getProgram/src/program_loader.c -o $@
+$(OBJDIR)/program_loader.o: program/get_program/program_loader.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c program/get_program/program_loader.c -o $@
 
-$(OBJDIR)/executeALU.o: letsPipeline/src/executeALU.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c letsPipeline/src/executeALU.c -o $@
+$(OBJDIR)/branch_predictors.o: architectureLayer/branch_predictor/branch_predictors.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c architectureLayer/branch_predictor/branch_predictors.c -o $@
 
-$(OBJDIR)/executeDATAMOVEMENT.o: letsPipeline/src/executeDATAMOVEMENT.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c letsPipeline/src/executeDATAMOVEMENT.c -o $@
+$(OBJDIR)/utils.o: pipeline/stages/utils.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c pipeline/stages/utils.c -o $@
 
-$(OBJDIR)/executeLOADSTORE.o: letsPipeline/src/executeLOADSTORE.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c letsPipeline/src/executeLOADSTORE.c -o $@
+$(OBJDIR)/label.o: architectureLayer/labels/label.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c architectureLayer/labels/label.c -o $@
 
-$(OBJDIR)/executeBRANCH.o: letsPipeline/src/executeBRANCH.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c letsPipeline/src/executeBRANCH.c -o $@
-
-$(OBJDIR)/executeHALT.o: letsPipeline/src/executeHALT.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c letsPipeline/src/executeHALT.c -o $@
-
-$(OBJDIR)/executeJUMP.o: letsPipeline/src/executeJUMP.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c letsPipeline/src/executeJUMP.c -o $@
-
-$(OBJDIR)/branch_predictors.o: thePredictors/src/branch_predictors.c | $(OBJDIR)
-	$(CC) $(CFLAGS) -c thePredictors/src/branch_predictors.c -o $@
 
 clean:
 	rm -rf $(OBJDIR) $(TARGET)
