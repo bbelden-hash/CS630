@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        mem(&next.mem_wb, &curr.ex_mem, &cpu, &ram);
+        mem(&next.mem_wb, &curr.ex_mem, &ram);
         
         curr = next;
         clock++;

@@ -2,7 +2,7 @@
 #include "../pipeline.h"
 #include "../utils.h"
 
-void mem(MEM_WB *mem_wb, EX_MEM *ex_mem, CPU *cpu, MEM *ram) {
+void mem(MEM_WB *mem_wb, EX_MEM *ex_mem, MEM *ram) {
 
     if (ex_mem->valid == 0) {
         // fprintf(stdout, "bubble: +1 older instruction in EX/MEM empty\n");
@@ -40,14 +40,14 @@ void mem(MEM_WB *mem_wb, EX_MEM *ex_mem, CPU *cpu, MEM *ram) {
         mem_wb->valid = 1;
     }
     else if (ex_mem->op == STORE) {
-        int address = ex_mem->ALU_result;
+        int address = ex_mem->dest;
 
         int address0 = wrapAddress(address);
         int address1 = wrapAddress(address + 1);
         int address2 = wrapAddress(address + 2);
         int address3 = wrapAddress(address + 3);
 
-        uint32_t storage = cpu->R[ex_mem->Rs_val];
+        uint32_t storage = ex_mem->ALU_result;
 
         /*
             move the bits in 'storage' to the right by n positions (storage >> n)
@@ -75,20 +75,20 @@ void mem(MEM_WB *mem_wb, EX_MEM *ex_mem, CPU *cpu, MEM *ram) {
         ram->M[address2] = byte2;
         ram->M[address3] = byte3;
         
-        mem_wb->valid = 0;
+        mem_wb->valid = 1;
         mem_wb->mem_data = storage;
     }
     else if (ex_mem->op == STORE_B) {
-        uint32_t storage = cpu->R[ex_mem->Rs_val];
+        uint32_t storage = ex_mem->ALU_result;
         uint8_t value = (storage >> 0) & 0xFF;
 
-        int address = ex_mem->ALU_result;
+        int address = ex_mem->dest;
 
         address = wrapAddress(address);
 
         ram->M[address] = value;
 
-        mem_wb->valid = 0;
+        mem_wb->valid = 1;
         mem_wb->mem_data = storage;
     }
     else {
