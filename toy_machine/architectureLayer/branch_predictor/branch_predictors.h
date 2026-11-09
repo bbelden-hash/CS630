@@ -23,9 +23,6 @@ typedef struct {
     unsigned int value : 2;
 } TwoBit;
 
-OneBit BHT_1BIT[16];
-TwoBit BHT_2BIT[16];
-
 typedef struct {
     int MISS_NT;
     int MISS_BTFN;
@@ -40,10 +37,12 @@ typedef struct {
     int BHT_2BIT;
 } BranchPredictors;
 
-int NUM_BRANCHES;
-int NUM_TAKEN;
-
 int NT(void);
 void initialize_BHT(OneBit *BHT_1BIT, TwoBit *BHT_2BIT);
+int value_1BIT(OneBit *BHT_1BIT, int p);
+int value_2BIT(TwoBit *BHT_2BIT, int p);
+void check_prediction(int cond, BranchPredictors *branch_predictor, MisPrediction *misprediction);
+void update_1BIT(OneBit *BHT_1BIT, int p, int outcome);
+void update_2BIT(TwoBit *BHT_2BIT, int p, int outcome);
 
 #endif

@@ -1,14 +1,14 @@
-# CS 630/730 — HW1 build/grading environment
+# CS 630/730 — HW build/grading environment
 #
 # Build:
-#   docker build -t cs630-build:2026fa-hw1 .
+#   docker build -t cs630-build:2026fa-hw3 .
 #
 # Student self-check, submission mounted at /work (see README.md for more):
-#   docker run --rm -v "$PWD/submission:/work:ro" -w /work cs630-build:2026fa-hw1 \
-#       hw1_check.sh ./hw1_toy_machine
+#   docker run --rm -v "$PWD/submission:/work:ro" -w /work cs630-build:2026fa-hw3 \
+#       hw3_check.sh ./hw3_toy_machine
 #
 # Interactive shell for debugging a submission:
-#   docker run --rm -it -v "$PWD/submission:/work" -w /work cs630-build:2026fa-hw1 bash
+#   docker run --rm -it -v "$PWD/submission:/work" -w /work cs630-build:2026fa-hw3 bash
 
 FROM ubuntu:24.04
 
@@ -44,8 +44,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # --- Grading script ----------------------------------------------------------
-COPY hw_check.sh /usr/local/bin/hw1_check.sh
-RUN chmod 755 /usr/local/bin/hw1_check.sh
+COPY hw_check.sh /usr/local/bin/hw3_check.sh
+RUN chmod 755 /usr/local/bin/hw3_check.sh
 
 # --- Unprivileged grading user -----------------------------------------------
 # Student code runs as an unprivileged user, not root. Submissions are

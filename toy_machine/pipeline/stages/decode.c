@@ -9,6 +9,7 @@ int decode(ID_EX *id_ex, IF_ID *if_id, CPU *cpu) {
     }
 
     id_ex->instr = if_id->instr;
+    id_ex->bp = if_id->bp;
 
     // initialize unused operands
     id_ex->Rs1_val = 0;

@@ -2,7 +2,7 @@
 #include "../pipeline.h"
 #include "../../architectureLayer/labels/label.h"
 
-int execute(EX_MEM *ex_mem, ID_EX *id_ex, CPU *cpu) {
+int execute(EX_MEM *ex_mem, ID_EX *id_ex, CPU *cpu, int *taken, MisPrediction *misprediction, OneBit *BHT_1BIT, TwoBit *BHT_2BIT) {
 
     if (id_ex->valid == 0) {
         // fprintf(stdout, "bubble: +1 older instruction ID/EX is empty\n");
@@ -93,15 +93,19 @@ int execute(EX_MEM *ex_mem, ID_EX *id_ex, CPU *cpu) {
 
         ex_mem->op = id_ex->instr.op;
 
+        check_prediction(id_ex->cond, &id_ex->bp, misprediction);
+        update_1BIT(BHT_1BIT, id_ex->instr.pc, id_ex->cond);
+        update_2BIT(BHT_2BIT, id_ex->instr.pc, id_ex->cond);
+
         if (id_ex->cond == 1) {
+            (*taken)++;
+
             ex_mem->ALU_result = id_ex->instr.npc;
             ex_mem->dest = -1;
-
-            cpu->pc = ex_mem->ALU_result;
-
             ex_mem->npc = id_ex->instr.npc + 1;
             ex_mem->valid = 1;
 
+            cpu->pc = ex_mem->ALU_result;
             return 1;
         } else {
             ex_mem->ALU_result = -1;

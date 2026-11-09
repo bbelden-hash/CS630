@@ -77,6 +77,7 @@ void mem(MEM_WB *mem_wb, EX_MEM *ex_mem, MEM *ram) {
         
         mem_wb->valid = 1;
         mem_wb->mem_data = storage;
+        mem_wb->dest = -1;
     }
     else if (ex_mem->op == STORE_B) {
         uint32_t storage = ex_mem->ALU_result;
@@ -90,6 +91,7 @@ void mem(MEM_WB *mem_wb, EX_MEM *ex_mem, MEM *ram) {
 
         mem_wb->valid = 1;
         mem_wb->mem_data = storage;
+        mem_wb->dest = -1;
     }
     else {
         mem_wb->reg_write = ex_mem->ALU_result;

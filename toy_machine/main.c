@@ -7,6 +7,7 @@
 #include "architectureLayer/machine_state.h"
 #include "architectureLayer/initial_state.h"
 #include "architectureLayer/labels/label.h"
+#include "architectureLayer/branch_predictor/branch_predictors.h"
 
 // relative path to header for program
 #include "program/program.h"
@@ -24,6 +25,7 @@ int main(int argc, char *argv[]) {
 
     CPU cpu;
     MEM ram;
+    MisPrediction misprediction = {0};
 
     initialize_machine(&cpu);
     initialize_MEM(&ram);
@@ -49,6 +51,13 @@ int main(int argc, char *argv[]) {
     PipelineRegisters curr = {0};
     PipelineRegisters next = {0};
 
+    OneBit BHT_1BIT[16];
+    TwoBit BHT_2BIT[16];
+    int branches = 0;
+    int taken = 0;
+
+    initialize_BHT(BHT_1BIT, BHT_2BIT);
+
     int clock = 0;
     int data_stalls = 0;
     int control_stalls = 0;
@@ -62,7 +71,7 @@ int main(int argc, char *argv[]) {
             break;
         }
 
-        int execute_status = execute(&next.ex_mem, &curr.id_ex, &cpu);
+        int execute_status = execute(&next.ex_mem, &curr.id_ex, &cpu, &taken, &misprediction, BHT_1BIT, BHT_2BIT);
         
         if (execute_status == 1) {
             next.id_ex = (ID_EX){0};
@@ -83,7 +92,10 @@ int main(int argc, char *argv[]) {
             }
             else if (cpu.pc >= 0 && cpu.pc < program_size) {
                 Instrn IR = program[cpu.pc];
-                fetch(&next.if_id, &IR, &cpu.pc);
+
+                if (fetch(&next.if_id, &IR, &cpu.pc, BHT_1BIT, BHT_2BIT) == 1) {
+                    branches++;
+                }
             }
         }
 
@@ -104,6 +116,12 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    printf("BRANCHES=%u\n", branches);
+    printf("TAKEN=%u\n", taken);
+    printf("MISS_NT=%u\n", misprediction.MISS_NT);
+    printf("MISS_BTFN=%u\n", misprediction.MISS_BTFN);
+    printf("MISS_1BIT=%u\n", misprediction.MISS_1BIT);
+    printf("MISS_2BIT=%u\n", misprediction.MISS_2BIT);
     printf("CYCLES=%u\n", clock);
     printf("INSTRS=%u\n", instrs);
     printf("DATA_STALLS=%u\n", data_stalls);

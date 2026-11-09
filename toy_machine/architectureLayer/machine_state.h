@@ -4,6 +4,8 @@
 #define NUM_REGISTERS 8
 #define NUM_MEM_LOCATIONS 1024
 
+#include "branch_predictor/branch_predictors.h"
+
 #include <stdint.h>
 
 // instruction set:
@@ -27,6 +29,7 @@ typedef enum {
 typedef struct {
     Opcode op;
 
+    int pc;
     int npc;
     int Rs1;
     int Rs2;
@@ -40,12 +43,14 @@ typedef struct {
 
 typedef struct {
     Instrn instr;
+    BranchPredictors bp;
 
     int valid;
 } IF_ID;
 
 typedef struct {
     Instrn instr;
+    BranchPredictors bp;
     int32_t Rs1_val; // value read from register Rs1
     int32_t Rs2_val; // value read from register Rs2
     int32_t Rs_val; // value read from register Rs (MOVE/STORE)
