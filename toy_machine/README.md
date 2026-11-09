@@ -59,9 +59,12 @@ For control hazard; if an unconditional JUMP branch is taken, the program counte
 
 <h3>TO COMPILE</h3>
 make clean
+
 make 
 
 <h3>TO RUN</h3>
 ./main input.asm
+
+
 
 <img src="microController.png" alt="Micro" width="400" style="display: block; margin: 40 auto;">
