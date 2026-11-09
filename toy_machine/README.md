@@ -6,7 +6,7 @@ This is a simple design of a cpu simulation emulating RISC-V like characteristic
 
 The pipeline structure permits the processor to handle varius instructions simultaneously, enhancing performance. This also presents challenges, such as pipeline hazards which need to be addressed using methods like forwarding, stalling, and branch prediction to maintain efficiency and precision in execution.
 
-Every stage of the pipeline is also occupied by an instruction after the first 4 clock cycles.
+Every stage of the pipeline is always occupied by an instruction after the first 4 clock cycles.
 
 <h3>REGISTER FILE</h3>
 
