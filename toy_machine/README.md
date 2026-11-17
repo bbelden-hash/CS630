@@ -57,6 +57,56 @@ For control hazards; if a branch is taken, the program counter is changed from t
 
 For control hazard; if an unconditional JUMP branch is taken, the program counter is updated to the target address. This is done in the decode stage. Upon a branch being taken, the pipeline register currently scheduled to be next up in the IF/ID is flushed. 
 
+## Project layout
+
+```text
+toy_machine/
+├── architectureLayer/
+    └── branch_predictor/
+        └── branch_predictors.c
+        └── branch_predictors.h
+    └── labels/
+        └── label.c
+        └── label.h
+    └── initial_state.h
+    └── machine_state.h
+├── docker/
+    └── Dockerfile
+    └── hw_check.sh
+├── obj/
+    └── branch_predictors.o
+    └── decode.o
+    └── execute.o
+    └── fetch.o
+    └── instruction_parser.o
+    └── label.o
+    └── main.o
+    └── mem.o
+    └── program_loader.o
+    └── utils.o
+    └── writeback.o
+├── pipeline/
+    └── stages/
+        └── decode.c
+        └── execute.c
+        └── fetch.c
+        └── mem.c
+        └── utils.c
+        └── wb.c
+    └── pipeline.h
+    └── utils.h
+├── program/
+    └── get_program/
+        └── instruction_parser.c
+        └── program_loader.c
+    └── program.h
+├── main
+├── main.c
+├── Makefile
+├── README.md
+├── test.asm
+```
+
 <h3>TO COMPILE</h3>
 make clean
 
@@ -64,7 +114,3 @@ make
 
 <h3>TO RUN</h3>
 ./main input.asm
-
-
-
-<img src="microController.png" alt="Micro" width="400" style="display: block; margin: 40 auto;">
