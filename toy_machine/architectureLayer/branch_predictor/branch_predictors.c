@@ -36,11 +36,7 @@ int value_2BIT(TwoBit *BHT_2BIT, int p) {
     int loc = p % 16;
     int pred = BHT_2BIT[loc].value;
 
-    if (pred >= 2) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return pred;
 }
 
 void check_prediction(int cond, BranchPredictors *branch_predictor, MisPrediction *misprediction) {
@@ -60,10 +56,10 @@ void check_prediction(int cond, BranchPredictors *branch_predictor, MisPredictio
     if (cond == 1 && branch_predictor->BHT_1BIT == 0) {
         misprediction->MISS_1BIT++;
     }
-    if (cond == 0 && branch_predictor->BHT_2BIT == 1) {
+    if (cond == 0 && branch_predictor->BHT_2BIT >= 2) {
         misprediction->MISS_2BIT++;
     }
-    if (cond == 1 && branch_predictor->BHT_2BIT == 0) {
+    if (cond == 1 && branch_predictor->BHT_2BIT < 2) {
         misprediction->MISS_2BIT++;
     }
 }

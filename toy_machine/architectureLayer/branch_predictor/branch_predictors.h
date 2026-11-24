@@ -38,6 +38,7 @@ typedef struct {
 } BranchPredictors;
 
 int NT(void);
+int BTFN(int target, int branch);
 void initialize_BHT(OneBit *BHT_1BIT, TwoBit *BHT_2BIT);
 int value_1BIT(OneBit *BHT_1BIT, int p);
 int value_2BIT(TwoBit *BHT_2BIT, int p);

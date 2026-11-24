@@ -55,6 +55,9 @@ int main(int argc, char *argv[]) {
     TwoBit BHT_2BIT[16];
     int branches = 0;
     int taken = 0;
+    int jumps = 0;
+
+    int squash = 0;
 
     initialize_BHT(BHT_1BIT, BHT_2BIT);
 
@@ -71,39 +74,48 @@ int main(int argc, char *argv[]) {
             break;
         }
 
-        int execute_status = execute(&next.ex_mem, &curr.id_ex, &cpu, &taken, &misprediction, BHT_1BIT, BHT_2BIT);
+        mem(&next.mem_wb, &curr.ex_mem, &ram);
         
-        if (execute_status == 1) {
-            next.id_ex = (ID_EX){0};
-            next.if_id = (IF_ID){0};
+        execute(&next.ex_mem, &curr.id_ex, &misprediction);
 
-            control_stalls += 2;
-        }
-        else if (data_hazard(&curr.if_id, &curr.id_ex, &curr.ex_mem)) {
-            // stall IF and ID
+        if (data_hazard(&curr.if_id, &curr.id_ex, &curr.ex_mem) == 1) {
             next.if_id = curr.if_id;
             data_stalls++;
         }
         else {
-            
-            if (decode(&next.id_ex, &curr.if_id, &cpu) == -1) {
+            squash = 0;
+
+            if (decode(&next.id_ex, &curr.if_id, &next.ex_mem, &curr.ex_mem, &next.mem_wb, &cpu, BHT_1BIT, BHT_2BIT, &squash, &taken) == -1) {
+                next.if_id = (IF_ID){0};
+                jumps++;
+                control_stalls++;
+            } 
+            else if (squash == 1) {
                 next.if_id = (IF_ID){0};
                 control_stalls++;
+
+                if (next.id_ex.cond == 1) {
+                    cpu.pc = curr.if_id.instr.npc;
+                } else if (next.id_ex.cond == 0) {
+                    cpu.pc = curr.if_id.instr.pc + 1;
+                }
             }
             else if (cpu.pc >= 0 && cpu.pc < program_size) {
-                Instrn IR = program[cpu.pc];
 
+                Instrn IR = program[cpu.pc];
                 if (fetch(&next.if_id, &IR, &cpu.pc, BHT_1BIT, BHT_2BIT) == 1) {
                     branches++;
+                    if (next.if_id.bp.BHT_2BIT == 2 || next.if_id.bp.BHT_2BIT == 3) {
+                        cpu.pc = next.if_id.instr.npc;
+                    }
                 }
             }
         }
 
-        mem(&next.mem_wb, &curr.ex_mem, &ram);
-        
         curr = next;
         clock++;
     }
+    
 
     for (int i = 0; i < NUM_REGISTERS; i++) {
         fprintf(stdout, "R%d=%d\n", i, cpu.R[i]);
@@ -126,6 +138,7 @@ int main(int argc, char *argv[]) {
     printf("INSTRS=%u\n", instrs);
     printf("DATA_STALLS=%u\n", data_stalls);
     printf("CTRL_STALLS=%u\n", control_stalls);
+    printf("JUMPS=%u\n", jumps);
 
     return 0;
 }

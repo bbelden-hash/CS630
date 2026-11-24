@@ -44,6 +44,7 @@ typedef struct {
 typedef struct {
     Instrn instr;
     BranchPredictors bp;
+    int32_t forward_val;
 
     int valid;
 } IF_ID;

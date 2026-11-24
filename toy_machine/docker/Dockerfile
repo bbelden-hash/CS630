@@ -1,14 +1,14 @@
-# CS 630/730 — HW build/grading environment
+# CS 630/730 — HW4 build/grading environment
 #
 # Build:
-#   docker build -t cs630-build:2026fa-hw3 .
+#   docker build -t cs630-build:2026fa-hw4 .
 #
 # Student self-check, submission mounted at /work (see README.md for more):
-#   docker run --rm -v "$PWD/submission:/work:ro" -w /work cs630-build:2026fa-hw3 \
-#       hw3_check.sh ./hw3_toy_machine
+#   docker run --rm -v "$PWD/submission:/work:ro" -w /work cs630-build:2026fa-hw4 \
+#       hw4_check.sh ./hw4_toy_machine
 #
 # Interactive shell for debugging a submission:
-#   docker run --rm -it -v "$PWD/submission:/work" -w /work cs630-build:2026fa-hw3 bash
+#   docker run --rm -it -v "$PWD/submission:/work" -w /work cs630-build:2026fa-hw4 bash
 
 FROM ubuntu:24.04
 
@@ -21,7 +21,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # python3           -> run Python submissions
 # default-jdk       -> javac/java for Java submissions
 # ocaml/dune/findlib-> build OCaml submissions (and the OCaml grading oracle)
-# openssl/coreutils/bash -> required by hw1_check.sh / hw1_grade.sh (base64
+# openssl/coreutils/bash -> required by hw4_check.sh / hw4_grade.sh (base64
 #   decode via openssl/base64, GNU timeout)
 # perl/gzip -> not required by the grading scripts themselves; kept as
 #   general-purpose scripting/archive tools for later homeworks
@@ -44,8 +44,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # --- Grading script ----------------------------------------------------------
-COPY hw_check.sh /usr/local/bin/hw3_check.sh
-RUN chmod 755 /usr/local/bin/hw3_check.sh
+COPY hw4_check.sh /usr/local/bin/hw4_check.sh
+RUN chmod 755 /usr/local/bin/hw4_check.sh
 
 # --- Unprivileged grading user -----------------------------------------------
 # Student code runs as an unprivileged user, not root. Submissions are

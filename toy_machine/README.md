@@ -1,61 +1,10 @@
 <img src="risc_pipeline.png" alt="RISC Pipeline" width="650" style="display: block; margin: 10 auto;">
 
-<h1 style="text-align: center;">TOY MACHINE</h1>
+# Toy Machine
 
 This is a simple design of a cpu simulation emulating RISC-V like characteristics. RISC-V pipeline architecture trys to improve processing efficiency by breaking down instruction execution into five stages. This hopes to enable the simultaneous processing of multiple instructions. The five stages involve retrieving the instruction from memory, decoding the instruction, performing the specified operation, accessing memory for data transfer, and writing the results back to the register file. 
 
 The pipeline structure permits the processor to handle varius instructions simultaneously, enhancing performance. This also presents challenges, such as pipeline hazards which need to be addressed using methods like forwarding, stalling, and branch prediction to maintain efficiency and precision in execution.
-
-Every stage of the pipeline is always occupied by an instruction after the first 4 clock cycles.
-
-<h3>REGISTER FILE</h3>
-
-Register file consists of a set of registers used for holding data during instruction execution. In this simple implementation, the number of registers is 8: R[0], R[1], R[2], R[3], R[4], R[5], R[6], R[7]. Each register is of type 32-bit integer (int32_t).
-
-PC, stores the address of the next instruction to be fetched from memory. During instruction execution, the PC is incremented to point to the next instruction in memory. When a branch or jump instruction is executed, the PC is updated to point to the new target address. 
-
-IR, stores the current instruction fetched from memory using the address specified by the PC. The IR is an abbreviation for instruction register. The IR temporarily stores the instruction currently being decoded or executed.
-
-The program also contains 4 pipeline registers for storing information traveling along through the pipeline: IF/ID, ID/EX, EX/MEM, MEM/WB. These pipeline registers prevent data overwrite as multiple instructions pass through the pipeline concurrently. 
-
-<h3>ISA</h3>
-
-The instruction set serves as the foundation of the RISC-V architecture. It defines a set of basic instructions for integer operations, control flow, and memory access. For this simple implementation 12 instructions have been defined.
-
-<h5>Arithmetic and Logical Operations</h5>
-These instructions perform basic calculations on data in registers.
-
-- ADD: adds the contents of two registers and stores the result in a destination register.
-- SUB: subtracts the contents of one register from another and stores the result in a destination register.
-
-<h5>Memory Access</h5>
-These instructions are responsible for transferring data between the processor's registers and memory.
-
-- LOAD, LOAD_B: these instructions read data from memory and store it in a register.
-- STORE, STORE_B: these instructions write data from a register to memory.
-
-<h5>Control Flow</h5>
-These instructions alter the flow of program executions by changing the program counter (PC).
-
-- BEQ, BLT, BNE, BGE: these instructions allow for conditional branching based on register values. 
-- JUMP: this instruction jumps to a specified address unconditionally.
-
-<h5>Data Movement</h5>
-
-- LOAD_I: this instruction places an immediate value integer into a destination register.
-- MOVE: this instruction takes a value from a source register and places that value into a destination register, not changing the source register.
-
-<h5>Termination</h5>
-
-- HALT: this instruction is your exit specifier, when read the program terminates
-
-<h3>HAZARDS</h3>
-
-For data hazards; the current IF/ID pipeline register's source register values are compared to the current ID/EX and EX/MEM pipeline register's destination register value. If the any of the register number values happen to be equal IF/ID is stalled in the next clock cycle.
-
-For control hazards; if a branch is taken, the program counter is changed from the next sequential address in line to the target address specified by the label in the branch instruction. This is done in the execute stage. Upon a branch being taken, the pipeline registers currently scheduled to be next up in IF/ID and ID/EX are flushed.
-
-For control hazard; if an unconditional JUMP branch is taken, the program counter is updated to the target address. This is done in the decode stage. Upon a branch being taken, the pipeline register currently scheduled to be next up in the IF/ID is flushed. 
 
 ## Project layout
 
@@ -107,10 +56,67 @@ toy_machine/
 ├── test.asm
 ```
 
-<h3>TO COMPILE</h3>
-make clean
+## ├── architectureLayer/
+└── branch_predictor/  
+branch_predictors.c:  
+&nbsp;&nbsp;&nbsp;&nbsp;Directory consists of all branch predictor logic. Four branch predictors are used: NT, BTFN, 1BIT, and 2BIT.  
+&nbsp;&nbsp;&nbsp;&nbsp;NT - predict not-taken, always predicts a branch condition will not be taken, npc = pc + 1  
+&nbsp;&nbsp;&nbsp;&nbsp;BTFN - predicts taken if the branch target pc is at or before the branch pc, otherwise predicts not-taken  
+&nbsp;&nbsp;&nbsp;&nbsp;1BIT - A branch history table of 16 entries, each holding a single bit (the last outcome seen). The branch at pc p uses entry p mod 16. 1BIT predicts whatever that entry holds, and after the branch executes the entry is set to the actual outcome. All entries start at not-taken.  
+&nbsp;&nbsp;&nbsp;&nbsp;2BIT - Separate 16-entry branch history table indexed the same way, where each entry is a counter from 0 to 3. Predicts taken if the counter is >= 2 and not taken otherwise. After branch executes, counter goes up by 1 if the branch was taken and down by 1 if it was not, staying between 0 and 3. All entries start at 1.  
 
-make 
+└── labels/  
+label.c, labels.h:  
+&nbsp;&nbsp;&nbsp;&nbsp;Directory is responsible for handling labels in relationship to branch instructions.  
+&nbsp;&nbsp;&nbsp;&nbsp;LabelEntry - This is a struct with two members; position and resolved. Position is an integer, where the label is located. Resolved is an integer indicating if the label has been resolved or not.  
+&nbsp;&nbsp;&nbsp;&nbsp;NamedLabel - This is a struct with two members; name and id. Name is the string literal of the label. Id is an integer showing identification corresponding to name.  
+&nbsp;&nbsp;&nbsp;&nbsp;LocalLabelTable - This is a struct with two members; a LabelEntry and a NamedLabel. LocalLabelTable is the relationship between the label identifier and the id's final location.  
+&nbsp;&nbsp;&nbsp;&nbsp;In label.c, functions find_or_create_label, bind_label, and resolve_label help utilize variables defined in labels.h. They pair branch instructions with their correct labels and the locations to branch to upon a branch condition resulting in taken.  
 
-<h3>TO RUN</h3>
-./main input.asm
+└── machine_state.h  
+&nbsp;&nbsp;&nbsp;&nbsp;Header file defining the architectural state. Main items to be used throughout implementation.  
+&nbsp;&nbsp;&nbsp;&nbsp;Opcode - define the available instructions to use: LOAD_I, ADD, SUB, MOVE, LOAD, STORE, LOAD_B, STORE_B, BEQ, BNE, BLT, BGE, JUMP, HALT.  
+&nbsp;&nbsp;&nbsp;&nbsp;Instructions - define the information needed to perform operations on operands properly (Instrn).  
+&nbsp;&nbsp;&nbsp;&nbsp;Pipeline Registers - registers located in-between pipeline stages to store information and prevent data overwrite (IF/ID, ID/EX, EX/MEM, MEM/WB).  
+&nbsp;&nbsp;&nbsp;&nbsp;CPU - the instruction register, program counter, and 8 general purpose registers.  
+&nbsp;&nbsp;&nbsp;&nbsp;MEM - memory, 1024 unsigned char locations.  
+
+## ├── pipeline/
+└── stages/  
+&nbsp;&nbsp;&nbsp;&nbsp;fetch.c:  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is stage one in the 5-stage standard pipeline. IF is responsible for grabbing the instruction in the instruction register and moving it into the IF/ID pipeline register. Fetch increments the program counter. If the instruction in the instruction register is of type branch, then fetch initializes the branch predictors.  
+&nbsp;&nbsp;&nbsp;&nbsp;decode.c:  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is stage two in the 5-stage standard pipeline. ID is responsible for grabbing the instruction in the IF/ID pipeline register, decoding information, and moving it along properly to the ID/EX pipeline register. In this implementation, decode is responsible for alot. ID recieves forwarding from older instructions in the pipeline if valid, checks branching conditions, performs the correct location as to where to branch, and updates the 1BIT and 2BIT branch tables.  
+&nbsp;&nbsp;&nbsp;&nbsp;execute.c  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is stage three in the 5-stage standard pipeline. EX grabs the information in the ID/EX pipeline register, performs calculations required of instruction semantics, and moves the information along to the EX/MEM pipeline register.  
+&nbsp;&nbsp;&nbsp;&nbsp;mem.c  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is stage four in the 5-stage standard pipeline. It uses the information in the EX/MEM pipeline register to perform necessary manipulations with memory (LOADS, STORES). If an instruction is not required memory, then MEM places the items in the EX/MEM pipeline register into the MEM/WB pipeline register to prepare for writeback.  
+ &nbsp;&nbsp;&nbsp;&nbsp;wb.c  
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is stage five in the 5-stage standard pipeline. It takes the information in the MEM/WB pipeline register and writes the reg_write variable into the register file corresponding to the register number dest.  
+ &nbsp;&nbsp;&nbsp;&nbsp;utils.c  
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This file contains utility functions: wrapAddress, writes_register, uses_register, data_hazard, read_operands, forward_values, and forward_operands.  
+
+ ## ├── program/
+ └── get_program/  
+ &nbsp;&nbsp;&nbsp;&nbsp;get_program is a directory consisting of instruction_parser.c and program_loader.c. The directory is responsible for reading the input .asm file, grabbing the instructions inside the .asm file, parsing the instructions, and placing the instruction in file order into a program array to be read by main and performed on by the 5-stages in the pipeline.  
+
+ ## ├── main.c
+ &nbsp;&nbsp;&nbsp;&nbsp;The driver, entry point where all items work together to complete operations on operands successfully until the end of the program array is reached, HALT.  
+
+ ## Forwarding, stalling, and other information
+ - To allow instructions being fetched to use newly written register files, writeback happens in first half of clock cycle and fetch happens in second half of clock cycle.  
+ - Data hazards check if the current instruction in the ID stage needs a register value that an earlier instruction in the pipeline hasn't finished producing yet. It checks for destinations in EX and MEM with sources in ID. Results in a data_stall. It primarily checks for two types of RAW hazards:  
+ &nbsp;&nbsp;&nbsp;&nbsp;1. Load-use hazards - an instruction needs a register value that a preceding LOAD or LOAB_B hasn't retrieved from memory yet.  
+ &nbsp;&nbsp;&nbsp;&nbsp;2. Branch hazards: A branch instruction needs a register value that a preceding instruction hasn't produced yet.  
+ - Forwarding is received in decode between instructions in EX or MEM. If a source is dependent upon a destination before the destination value has been written to the register file, newly computed values in EX or MEM can be forwarded to the ID/EX pipeline register before reaching writeback to confirm proper values entering execute.  
+ - In decode, for branch instructions, the next instruction fetched from memory is always the 2BIT prediction value. The prediction is checked against the condition in the decode as well. If the prediction is correct proceed with no further edit, if the prediction is incorrect edit the pc to the correct location.  
+
+ ## Set-up
+ ```text
+ to compile:
+    make clean
+    make
+
+to run:
+    ./main <input.asm>
+ ```
