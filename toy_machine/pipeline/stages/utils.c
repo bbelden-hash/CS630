@@ -68,7 +68,9 @@ static int uses_register(Instrn *instr, int reg) {
 
 int data_hazard(IF_ID *if_id, ID_EX *id_ex, EX_MEM *ex_mem) {
 
-    if (!if_id->valid) return 0;
+    if (!if_id->valid) {
+        return 0;
+    }
 
     Instrn *consumer = &if_id->instr;
 
@@ -83,17 +85,14 @@ int data_hazard(IF_ID *if_id, ID_EX *id_ex, EX_MEM *ex_mem) {
                 return 1;
             }
 
-            if (id_ex->instr.op == LOAD ||
-                id_ex->instr.op == LOAD_B) {
+            if (id_ex->instr.op == LOAD || id_ex->instr.op == LOAD_B) {
                 return 1;
             }
         }
     }
 
     // a branch must also wait while a load is in MEM.
-    if (is_branch && ex_mem->valid &&
-        (ex_mem->op == LOAD || ex_mem->op == LOAD_B)) {
-
+    if (is_branch && ex_mem->valid && (ex_mem->op == LOAD || ex_mem->op == LOAD_B)) {
         if (uses_register(consumer, ex_mem->dest)) {
             return 1;
         }
@@ -179,9 +178,7 @@ int forward_values(EX_MEM *newer_ex_mem, EX_MEM *older_ex_mem, MEM_WB *mem_wb, i
     }
 
     // completed memory operation: result is in MEM/WB
-    if (mem_wb->valid &&
-        mem_wb->dest == reg &&
-        reg >= 0 && reg < NUM_REGISTERS) {
+    if (mem_wb->valid && mem_wb->dest == reg && reg >= 0 && reg < NUM_REGISTERS) {
 
         switch (mem_wb->op) {
             case LOAD_I:
@@ -213,37 +210,35 @@ void forward_operands(ID_EX *id_ex, IF_ID *if_id, EX_MEM *newer_ex_mem, EX_MEM *
         case BNE:
         case BLT:
         case BGE:
-            if (forward_values(newer_ex_mem, older_ex_mem,
-                               mem_wb, instr->Rs1, &value))
+            if (forward_values(newer_ex_mem, older_ex_mem, mem_wb, instr->Rs1, &value)) {
                 id_ex->Rs1_val = value;
-
-            if (forward_values(newer_ex_mem, older_ex_mem,
-                               mem_wb, instr->Rs2, &value))
+            }    
+            if (forward_values(newer_ex_mem, older_ex_mem, mem_wb, instr->Rs2, &value)) {
                 id_ex->Rs2_val = value;
+            }
             break;
 
         case MOVE:
-            if (forward_values(newer_ex_mem, older_ex_mem,
-                               mem_wb, instr->Rs, &value))
+            if (forward_values(newer_ex_mem, older_ex_mem, mem_wb, instr->Rs, &value)) {
                 id_ex->Rs_val = value;
+            }
             break;
 
         case LOAD:
         case LOAD_B:
-            if (forward_values(newer_ex_mem, older_ex_mem,
-                               mem_wb, instr->Rb, &value))
+            if (forward_values(newer_ex_mem, older_ex_mem, mem_wb, instr->Rb, &value)) {
                 id_ex->Rs1_val = value;
+            }
             break;
 
         case STORE:
         case STORE_B:
-            if (forward_values(newer_ex_mem, older_ex_mem,
-                               mem_wb, instr->Rs, &value))
+            if (forward_values(newer_ex_mem, older_ex_mem, mem_wb, instr->Rs, &value)) {
                 id_ex->Rs_val = value;
-
-            if (forward_values(newer_ex_mem, older_ex_mem,
-                               mem_wb, instr->Rb, &value))
+            }
+            if (forward_values(newer_ex_mem, older_ex_mem, mem_wb, instr->Rb, &value)) {
                 id_ex->Rs1_val = value;
+            }
             break;
 
         case LOAD_I:
